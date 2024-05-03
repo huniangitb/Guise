@@ -1,6 +1,8 @@
 [versions]
 agp = "8.4.0"
 kotlin = "1.9.22"
+kotlinSerialization = "1.6.3"
+kotlinCompilerExtensionVersion = "1.5.10"
 coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.1.5"
@@ -34,10 +36,12 @@ material = { group = "com.google.android.material", name = "material", version.r
 yuki-api = { module = "com.highcapable.yukihookapi:api", version.ref = "yuki" }
 yuki-ksp-xposed = { module = "com.highcapable.yukihookapi:ksp-xposed", version.ref = "yuki" }
 xposed-api = { module = "de.robv.android.xposed:api", version.ref = "xposed" }
+kotlin-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinSerialization" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
