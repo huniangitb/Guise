@@ -15,13 +15,17 @@ object HookEntry : IYukiHookXposedInit {
     }
 
     override fun onHook() = encase {
+        val profiles = ModuleHookProfiles.Debug
+
         loadApp {
-            loadHooker(ModuleHookProfiles.Debug)
+            loadHooker(profiles)
         }
     }
 
     private fun PackageParam.loadHooker(profile: ModuleHookProfiles) {
-        loadHooker(PropertiesHooker(profile.properties))
+        with(profile) {
+            loadHooker(PropertiesHooker(properties))
+        }
     }
 
 }

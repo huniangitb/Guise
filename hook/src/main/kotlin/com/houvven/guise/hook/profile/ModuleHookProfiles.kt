@@ -13,7 +13,7 @@ data class ModuleHookProfiles(
 ) : HookProfile {
 
     override val isEffective: Boolean
-        get() = this != ModuleHookProfiles(packageName = this.packageName)
+        get() = this != Empty.copy(packageName = this.packageName)
 
     companion object {
 
@@ -23,14 +23,9 @@ data class ModuleHookProfiles(
         @JvmStatic
         val Debug = ModuleHookProfiles(
             properties = PropertiesProfile(
-                characteristics = "tablet", // QQ使用这个特征判断是否是平板
-                customProperties = mapOf(
-                    "ro.product.brand" to "HUAWEI",
-                    "ro.product.model" to "HUAWEI P30 Pro",
-                    "ro.product.manufacturer" to "HUAWEI",
-                    "ro.product.name" to "VOG-AL00",
-                    "ro.product.device" to "VOG-AL00"
-                )
+                brand = "Xiaomi",
+                model = "M2105K81C",
+                characteristics = "tablet"
             )
         )
     }

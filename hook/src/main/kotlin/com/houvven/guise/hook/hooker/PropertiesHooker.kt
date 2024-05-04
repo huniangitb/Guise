@@ -1,6 +1,7 @@
 package com.houvven.guise.hook.hooker
 
 import android.os.Build
+import android.util.Log
 import com.highcapable.yukihookapi.hook.factory.classOf
 import com.highcapable.yukihookapi.hook.factory.field
 import com.highcapable.yukihookapi.hook.factory.method
@@ -9,6 +10,7 @@ import com.houvven.guise.hook.hooker.base.GuiseBaseHooker
 import com.houvven.guise.hook.profile.item.PropertiesProfile
 import com.houvven.guise.hook.type.SystemPropertiesClass
 
+private const val TAG = "PropertiesHook"
 
 internal class PropertiesHooker(profile: PropertiesProfile) :
     GuiseBaseHooker<PropertiesProfile>(profile) {
@@ -20,30 +22,45 @@ internal class PropertiesHooker(profile: PropertiesProfile) :
     }
 
 
-    override fun doHook() = options.forEach { option ->
-        val (value, fieldName, propertiesKey, type) = option
+    override fun doHook() {
+        options.forEach { option ->
+            val (value, fieldName, _, type) = option
 
-        // Hook the value of the field in the Build class
-        if (!fieldName.isNullOrBlank()) {
-            when (type) {
-                BuildPropAscription.BUILD -> BuildClass
-                BuildPropAscription.VERSION -> classOf<Build.VERSION>()
-                BuildPropAscription.VERSION_CODES -> classOf<Build.VERSION_CODES>()
-                null -> null
-            }?.run {
-                field { name = fieldName }.ignored().get(null).set(value)
+            // Hook the value of the field in the Build class
+            if (!fieldName.isNullOrBlank()) {
+                when (type) {
+                    BuildPropAscription.BUILD -> BuildClass
+                    BuildPropAscription.VERSION -> classOf<Build.VERSION>()
+                    BuildPropAscription.VERSION_CODES -> classOf<Build.VERSION_CODES>()
+                    null -> null
+                }?.run {
+                    Log.d(TAG, "hook `Build` class 's static field: $fieldName, value: $value")
+                    field {
+                        name = fieldName
+                        modifiers {
+                            isStatic
+                        }
+                    }.give()?.set(null, value)
+                }
             }
         }
 
         // Hook the value of the system properties
-        if (propertiesKey.isNotBlank()) {
-            SystemPropertiesClass.run {
-                method {
-                    name = "native_get"
-                }.hook().before {
-                    if (args[0] == propertiesKey) {
-                        result = value
-                    }
+        val associate = options.associate { it.propertiesKey to it.value }
+        SystemPropertiesClass.method {
+            name = "get"
+        }.hookAll {
+            before {
+                val index = args.indexOfFirst { associate.containsKey(it) }
+                if (index != -1) {
+                    val key = args[index]
+                    Log.d(TAG, "hook system properties: $key, value: ${associate[key]}")
+                    result = associate[key]
+                }
+            }
+            after {
+                if (args.any { associate.containsKey(it) }) {
+                    Log.d(TAG, "get system properties: ${args.first()}, value: $result")
                 }
             }
         }
@@ -55,27 +72,32 @@ internal class PropertiesHooker(profile: PropertiesProfile) :
             PropertiesHookOption(
                 value = brand,
                 fieldName = "BRAND",
-                propertiesKey = "ro.product.brand"
+                propertiesKey = "ro.product.brand",
+                type = BuildPropAscription.BUILD
             ),
             PropertiesHookOption(
                 value = manufacturer,
                 fieldName = "MANUFACTURER",
-                propertiesKey = "ro.product.manufacturer"
+                propertiesKey = "ro.product.manufacturer",
+                type = BuildPropAscription.BUILD
             ),
             PropertiesHookOption(
                 value = model,
                 fieldName = "MODEL",
-                propertiesKey = "ro.product.model"
+                propertiesKey = "ro.product.model",
+                type = BuildPropAscription.BUILD
             ),
             PropertiesHookOption(
                 value = product,
                 fieldName = "PRODUCT",
-                propertiesKey = "ro.product.name"
+                propertiesKey = "ro.product.name",
+                type = BuildPropAscription.BUILD
             ),
             PropertiesHookOption(
                 value = device,
                 fieldName = "DEVICE",
-                propertiesKey = "ro.product.device"
+                propertiesKey = "ro.product.device",
+                type = BuildPropAscription.BUILD
             ),
             PropertiesHookOption(
                 value = characteristics,

@@ -23,7 +23,7 @@ data class PropertiesProfile(
 
     companion object {
 
-        val EMPTY by lazy { PropertiesProfile() }
+        val EMPTY =  PropertiesProfile()
 
         const val UNKNOWN = "unknown"
 
