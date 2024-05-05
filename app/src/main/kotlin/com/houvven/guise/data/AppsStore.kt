@@ -1,6 +1,6 @@
 package com.houvven.guise.data
 
-import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Parcelable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,8 +8,6 @@ import com.dylanc.mmkv.IMMKVOwner
 import com.dylanc.mmkv.MMKVOwner
 import com.houvven.guise.util.app.App
 import com.houvven.guise.util.app.AppScanner
-import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,15 +16,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
-import javax.inject.Inject
 
-@HiltViewModel
-class AppsStore
-@Inject constructor(
-    @ApplicationContext context: Context
-) : IMMKVOwner by MMKVOwner(ID), ViewModel() {
 
-    private val appScanner = AppScanner(context.packageManager)
+object AppsStore : IMMKVOwner by MMKVOwner("installed_apps"), ViewModel() {
+
+    private const val KEY_APPS = "apps"
+    private const val KEY_APPS_SETTINGS = "apps_settings"
+
+    private lateinit var appScanner: AppScanner
 
     private val _apps = MutableStateFlow(emptyList<App>())
 
@@ -50,7 +47,7 @@ class AppsStore
     val appsSettings = _appsSettings.asStateFlow()
 
     init {
-        initLoadApps()
+        // initLoadApps()
     }
 
 
@@ -58,7 +55,8 @@ class AppsStore
      * On class initialization, load the apps from the cache,
      * if the cache is empty, load the apps from the device
      */
-    private fun initLoadApps() {
+    fun initialize(packageManager: PackageManager) {
+        appScanner = AppScanner(packageManager)
         viewModelScope.launch(Dispatchers.Default) {
             if (!loadAppsFromCache()) loadApps()
         }
@@ -104,11 +102,9 @@ class AppsStore
     }
 
 
-    companion object {
-        const val ID = "installed_apps"
-        const val KEY_APPS = "apps"
-        const val KEY_APPS_SETTINGS = "apps_settings"
-    }
+    // companion object {
+
+    // }
 
     @Parcelize
     @Serializable
