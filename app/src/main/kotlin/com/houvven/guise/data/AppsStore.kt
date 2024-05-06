@@ -1,6 +1,5 @@
 package com.houvven.guise.data
 
-import android.content.pm.PackageManager
 import android.os.Parcelable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,6 +7,7 @@ import com.dylanc.mmkv.IMMKVOwner
 import com.dylanc.mmkv.MMKVOwner
 import com.houvven.guise.util.app.App
 import com.houvven.guise.util.app.AppScanner
+import com.houvven.guise.util.app.AppSortComparator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,9 +16,9 @@ import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
-class AppsStore(packageManager: PackageManager) : IMMKVOwner by MMKVOwner(ID), ViewModel() {
-
-    private val appScanner = AppScanner(packageManager)
+class AppsStore(
+    private val appScanner: AppScanner
+) : IMMKVOwner by MMKVOwner(ID), ViewModel() {
 
     private val _apps = MutableStateFlow(emptyList<App>())
     private val _appLoadState = MutableStateFlow(AppLoadState())
@@ -58,15 +58,17 @@ class AppsStore(packageManager: PackageManager) : IMMKVOwner by MMKVOwner(ID), V
      */
     @Suppress("MemberVisibilityCanBePrivate")
     suspend fun loadApps() {
-        val settings = _appsSettings.value
-        val totalAppSize = appScanner.installedAppsSize
+        val totalAppSize = appScanner.installedAppsSizeAsUser
+
+        _apps.update { emptyList() }
         _appLoadState.update { AppLoadState.INIT_LOAD_STATE.copy(totalAppSize = totalAppSize) }
-        appScanner
-            .scanAppsFlow(includeSystemApps = settings.includeSystemApps)
+        appScanner.scanAppsFlowAsUser(includeSystemApps = true)
             .collect { app ->
                 _apps.update { it + app }
-                _appLoadState.update { it.incrementLoadedAppSize() }
-                _appLoadState.tryDone()
+                _appLoadState.incrementLoadedAppSize()
+                _appLoadState.tryDone {
+                    _apps.update { it.sortedWith(AppSortComparator.AppNameLocaleComparator) }
+                }
             }
 
         // on each update, cache the apps
@@ -79,16 +81,19 @@ class AppsStore(packageManager: PackageManager) : IMMKVOwner by MMKVOwner(ID), V
      * @return `true` if the cache is not empty, `false` otherwise
      */
     private suspend fun loadAppsFromCache(): Boolean {
+        _apps.update { emptyList() }
         _appLoadState.initLoadState()
 
         val packageNames = kv.decodeStringSet(KEY_APPS, emptySet())
         if (packageNames.isNullOrEmpty()) return false
 
-        _appLoadState.setAppSize(packageNames.size)
-        appScanner.getAppsFlow(packageNames).collect { app ->
+        _appLoadState.setTotalAppSize(packageNames.size)
+        appScanner.getAppsFlowAsUser(packageNames).collect { app ->
             _apps.update { it + app }
             _appLoadState.incrementLoadedAppSize()
-            _appLoadState.tryDone()
+            _appLoadState.tryDone {
+                _apps.update { it.sortedWith(AppSortComparator.AppNameLocaleComparator) }
+            }
         }
         return _apps.value.isNotEmpty()
     }
@@ -112,7 +117,7 @@ class AppsStore(packageManager: PackageManager) : IMMKVOwner by MMKVOwner(ID), V
     @Parcelize
     @Serializable
     data class AppsSettings(
-        val includeSystemApps: Boolean = false
+        val includeSystemApps: Boolean = true
     ) : Parcelable
 
 
@@ -125,10 +130,6 @@ class AppsStore(packageManager: PackageManager) : IMMKVOwner by MMKVOwner(ID), V
 
         val isDoneLoading: Boolean get() = totalAppSize == loadedAppSize
 
-        fun setAppSize(size: Int) = copy(totalAppSize = size)
-
-        fun incrementLoadedAppSize() = copy(loadedAppSize = loadedAppSize + 1)
-
         companion object {
             val INIT_LOAD_STATE = AppLoadState(isLoading = true)
         }
@@ -137,12 +138,16 @@ class AppsStore(packageManager: PackageManager) : IMMKVOwner by MMKVOwner(ID), V
     private fun MutableStateFlow<AppLoadState>.initLoadState() =
         update { AppLoadState.INIT_LOAD_STATE }
 
-    private fun MutableStateFlow<AppLoadState>.setAppSize(size: Int) =
-        update { it.setAppSize(size) }
+    private fun MutableStateFlow<AppLoadState>.setTotalAppSize(size: Int) =
+        update { it.copy(totalAppSize = size) }
 
     private fun MutableStateFlow<AppLoadState>.incrementLoadedAppSize() =
-        update { it.incrementLoadedAppSize() }
+        update { it.copy(loadedAppSize = it.loadedAppSize + 1) }
 
-    private fun MutableStateFlow<AppLoadState>.tryDone() =
-        update { it.copy(isLoading = !it.isDoneLoading) }
+    private fun MutableStateFlow<AppLoadState>.tryDone(callback: () -> Unit = {}) {
+        if (value.isDoneLoading) {
+            callback()
+            update { it.copy(isLoading = false) }
+        }
+    }
 }

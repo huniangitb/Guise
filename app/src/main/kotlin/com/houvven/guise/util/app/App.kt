@@ -13,7 +13,5 @@ data class App(
     val packageName: String,
     @IgnoredOnParcel
     val icon: ImageBitmap = EmptyImageBitmap,
-    val firstInstallTime: Long,
-    val lastUpdateTime: Long,
     val isSystemApp: Boolean
 ) : Parcelable
