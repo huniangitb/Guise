@@ -11,7 +11,6 @@ import com.houvven.guise.util.app.AppScanner
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
@@ -60,16 +59,17 @@ class AppsStore(packageManager: PackageManager) : IMMKVOwner by MMKVOwner(ID), V
     @Suppress("MemberVisibilityCanBePrivate")
     suspend fun loadApps() {
         val settings = _appsSettings.value
-        _appLoadState.update { AppLoadState.INIT_LOAD_STATE.copy(appSize = appScanner.installedAppsSize) }
+        val totalAppSize = appScanner.installedAppsSize
+        _appLoadState.update { AppLoadState.INIT_LOAD_STATE.copy(totalAppSize = totalAppSize) }
         appScanner
             .scanAppsFlow(includeSystemApps = settings.includeSystemApps)
-            .collectLatest { app ->
+            .collect { app ->
                 _apps.update { it + app }
                 _appLoadState.update { it.incrementLoadedAppSize() }
+                _appLoadState.tryDone()
             }
 
         // on each update, cache the apps
-        _appLoadState.update { it.doneLoading() }
         cacheApps(_apps.value)
     }
 
@@ -85,11 +85,11 @@ class AppsStore(packageManager: PackageManager) : IMMKVOwner by MMKVOwner(ID), V
         if (packageNames.isNullOrEmpty()) return false
 
         _appLoadState.setAppSize(packageNames.size)
-        appScanner.getAppsFlow(packageNames).collectLatest { app ->
+        appScanner.getAppsFlow(packageNames).collect { app ->
             _apps.update { it + app }
             _appLoadState.incrementLoadedAppSize()
+            _appLoadState.tryDone()
         }
-        _appLoadState.doneLoading()
         return _apps.value.isNotEmpty()
     }
 
@@ -118,14 +118,16 @@ class AppsStore(packageManager: PackageManager) : IMMKVOwner by MMKVOwner(ID), V
 
     data class AppLoadState(
         val isLoading: Boolean = false,
-        val appSize: Int = 0,
+        val totalAppSize: Int = 0,
         val loadedAppSize: Int = 0
     ) {
-        fun setAppSize(size: Int) = copy(appSize = size)
+        val progress: Float get() = loadedAppSize / totalAppSize.toFloat()
+
+        val isDoneLoading: Boolean get() = totalAppSize == loadedAppSize
+
+        fun setAppSize(size: Int) = copy(totalAppSize = size)
 
         fun incrementLoadedAppSize() = copy(loadedAppSize = loadedAppSize + 1)
-
-        fun doneLoading() = copy(isLoading = false)
 
         companion object {
             val INIT_LOAD_STATE = AppLoadState(isLoading = true)
@@ -141,6 +143,6 @@ class AppsStore(packageManager: PackageManager) : IMMKVOwner by MMKVOwner(ID), V
     private fun MutableStateFlow<AppLoadState>.incrementLoadedAppSize() =
         update { it.incrementLoadedAppSize() }
 
-    private fun MutableStateFlow<AppLoadState>.doneLoading() =
-        update { it.doneLoading() }
+    private fun MutableStateFlow<AppLoadState>.tryDone() =
+        update { it.copy(isLoading = !it.isDoneLoading) }
 }
