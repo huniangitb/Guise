@@ -8,7 +8,10 @@ import com.highcapable.yukihookapi.hook.xposed.proxy.IYukiHookXposedInit
 import com.houvven.guise.hook.hooker.PropertiesHooker
 import com.houvven.guise.hook.profile.ModuleHookProfiles
 
-@InjectYukiHookWithXposed(isUsingXposedModuleStatus = true)
+@InjectYukiHookWithXposed(
+    modulePackageName = "com.houvven.guise",
+    isUsingXposedModuleStatus = true
+)
 object HookEntry : IYukiHookXposedInit {
 
     override fun onInit() = configs {
@@ -17,7 +20,7 @@ object HookEntry : IYukiHookXposedInit {
     override fun onHook() = encase {
         val profiles = ModuleHookProfiles.Debug
 
-        loadApp {
+        loadApp(isExcludeSelf = true) {
             loadHooker(profiles)
         }
     }
