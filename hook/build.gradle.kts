@@ -32,6 +32,9 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.majorVersion
     }
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {

@@ -8,7 +8,7 @@ import com.highcapable.yukihookapi.hook.xposed.proxy.IYukiHookXposedInit
 import com.houvven.guise.hook.hooker.PropertiesHooker
 import com.houvven.guise.hook.profile.ModuleHookProfiles
 
-@InjectYukiHookWithXposed(modulePackageName = "com.houvven.guise", isUsingXposedModuleStatus = true)
+@InjectYukiHookWithXposed(isUsingXposedModuleStatus = true)
 object HookEntry : IYukiHookXposedInit {
 
     override fun onInit() = configs {
