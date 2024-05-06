@@ -4,6 +4,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemColors
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,12 +16,14 @@ import com.houvven.guise.util.app.App
 
 @Composable
 fun AppListItem(
+    app: App,
     modifier: Modifier = Modifier,
-    app: App
+    onClick: () -> Unit = {},
+    colors: ListItemColors = ListItemDefaults.colors()
 ) {
     ListItem(
         headlineContent = { Text(text = app.name) },
-        supportingContent = { Text(text = app.packageName,) },
+        supportingContent = { if (app.name != app.packageName) Text(text = app.packageName) },
         leadingContent = {
             Image(
                 bitmap = app.icon,
@@ -29,8 +33,7 @@ fun AppListItem(
                     .clip(MaterialTheme.shapes.small)
             )
         },
-        modifier = modifier.clickable {
-
-        }
+        modifier = modifier.clickable { onClick.invoke() },
+        colors = colors
     )
 }
