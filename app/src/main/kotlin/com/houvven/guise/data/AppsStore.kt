@@ -22,11 +22,9 @@ class AppsStore(packageManager: PackageManager) : IMMKVOwner by MMKVOwner(ID), V
     private val appScanner = AppScanner(packageManager)
 
     private val _apps = MutableStateFlow(emptyList<App>())
-
-    /**
-     * The list of apps
-     */
+    private val _appLoadState = MutableStateFlow(AppLoadState())
     val apps = _apps.asStateFlow()
+    val appLoadState = _appLoadState.asStateFlow()
 
     private val _appsSettings = MutableStateFlow(
         kv.decodeParcelable(
@@ -62,11 +60,16 @@ class AppsStore(packageManager: PackageManager) : IMMKVOwner by MMKVOwner(ID), V
     @Suppress("MemberVisibilityCanBePrivate")
     suspend fun loadApps() {
         val settings = _appsSettings.value
+        _appLoadState.update { AppLoadState.INIT_LOAD_STATE.copy(appSize = appScanner.installedAppsSize) }
         appScanner
             .scanAppsFlow(includeSystemApps = settings.includeSystemApps)
-            .collectLatest { app -> _apps.update { it + app } }
+            .collectLatest { app ->
+                _apps.update { it + app }
+                _appLoadState.update { it.incrementLoadedAppSize() }
+            }
 
         // on each update, cache the apps
+        _appLoadState.update { it.doneLoading() }
         cacheApps(_apps.value)
     }
 
@@ -76,13 +79,17 @@ class AppsStore(packageManager: PackageManager) : IMMKVOwner by MMKVOwner(ID), V
      * @return `true` if the cache is not empty, `false` otherwise
      */
     private suspend fun loadAppsFromCache(): Boolean {
+        _appLoadState.initLoadState()
+
         val packageNames = kv.decodeStringSet(KEY_APPS, emptySet())
         if (packageNames.isNullOrEmpty()) return false
 
+        _appLoadState.setAppSize(packageNames.size)
         appScanner.getAppsFlow(packageNames).collectLatest { app ->
             _apps.update { it + app }
+            _appLoadState.incrementLoadedAppSize()
         }
-
+        _appLoadState.doneLoading()
         return _apps.value.isNotEmpty()
     }
 
@@ -107,4 +114,33 @@ class AppsStore(packageManager: PackageManager) : IMMKVOwner by MMKVOwner(ID), V
     data class AppsSettings(
         val includeSystemApps: Boolean = false
     ) : Parcelable
+
+
+    data class AppLoadState(
+        val isLoading: Boolean = false,
+        val appSize: Int = 0,
+        val loadedAppSize: Int = 0
+    ) {
+        fun setAppSize(size: Int) = copy(appSize = size)
+
+        fun incrementLoadedAppSize() = copy(loadedAppSize = loadedAppSize + 1)
+
+        fun doneLoading() = copy(isLoading = false)
+
+        companion object {
+            val INIT_LOAD_STATE = AppLoadState(isLoading = true)
+        }
+    }
+
+    private fun MutableStateFlow<AppLoadState>.initLoadState() =
+        update { AppLoadState.INIT_LOAD_STATE }
+
+    private fun MutableStateFlow<AppLoadState>.setAppSize(size: Int) =
+        update { it.setAppSize(size) }
+
+    private fun MutableStateFlow<AppLoadState>.incrementLoadedAppSize() =
+        update { it.incrementLoadedAppSize() }
+
+    private fun MutableStateFlow<AppLoadState>.doneLoading() =
+        update { it.doneLoading() }
 }
