@@ -1,14 +1,25 @@
 package com.houvven.guise
 
-import dagger.hilt.android.HiltAndroidApp
+import com.houvven.guise.injection.storeModule
+import com.houvven.guise.injection.viewModelModule
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.startKoin
 
 
 typealias AndroidApplication = android.app.Application
 
-@HiltAndroidApp
-class Application : AndroidApplication()
+class Application : AndroidApplication() {
+
     override fun onCreate() {
         super.onCreate()
-        // Initialize App Scanner
-        AppsStore.initialize(packageManager)
+        startKoin {
+            androidLogger()
+            androidContext(this@Application)
+            modules(
+                storeModule,
+                viewModelModule
+            )
+        }
     }
+}

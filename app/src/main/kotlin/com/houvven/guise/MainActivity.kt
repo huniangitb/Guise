@@ -5,16 +5,19 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.houvven.guise.ui.GuiseApp
-import dagger.hilt.android.AndroidEntryPoint
+import org.koin.androidx.compose.KoinAndroidContext
+import org.koin.core.annotation.KoinExperimentalAPI
 
-@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    @OptIn(KoinExperimentalAPI::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            GuiseApp()
+            KoinAndroidContext {
+                GuiseApp()
+            }
         }
     }
 }

@@ -17,13 +17,9 @@ import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
+class AppsStore(packageManager: PackageManager) : IMMKVOwner by MMKVOwner(ID), ViewModel() {
 
-object AppsStore : IMMKVOwner by MMKVOwner("installed_apps"), ViewModel() {
-
-    private const val KEY_APPS = "apps"
-    private const val KEY_APPS_SETTINGS = "apps_settings"
-
-    private lateinit var appScanner: AppScanner
+    private val appScanner = AppScanner(packageManager)
 
     private val _apps = MutableStateFlow(emptyList<App>())
 
@@ -31,7 +27,6 @@ object AppsStore : IMMKVOwner by MMKVOwner("installed_apps"), ViewModel() {
      * The list of apps
      */
     val apps = _apps.asStateFlow()
-
 
     private val _appsSettings = MutableStateFlow(
         kv.decodeParcelable(
@@ -47,7 +42,7 @@ object AppsStore : IMMKVOwner by MMKVOwner("installed_apps"), ViewModel() {
     val appsSettings = _appsSettings.asStateFlow()
 
     init {
-        // initLoadApps()
+        initLoadApps()
     }
 
 
@@ -55,8 +50,7 @@ object AppsStore : IMMKVOwner by MMKVOwner("installed_apps"), ViewModel() {
      * On class initialization, load the apps from the cache,
      * if the cache is empty, load the apps from the device
      */
-    fun initialize(packageManager: PackageManager) {
-        appScanner = AppScanner(packageManager)
+    private fun initLoadApps() {
         viewModelScope.launch(Dispatchers.Default) {
             if (!loadAppsFromCache()) loadApps()
         }
@@ -102,9 +96,11 @@ object AppsStore : IMMKVOwner by MMKVOwner("installed_apps"), ViewModel() {
     }
 
 
-    // companion object {
-
-    // }
+    companion object {
+        const val ID = "installed_apps"
+        const val KEY_APPS = "apps"
+        const val KEY_APPS_SETTINGS = "apps_settings"
+    }
 
     @Parcelize
     @Serializable

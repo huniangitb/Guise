@@ -4,8 +4,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.hilt.android)
-    // alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -80,20 +79,21 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
+    // compose
     implementation(libs.androidx.material.icons.extended)
-    implementation(libs.androidx.hilt.navigation.compose)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    // lifecycle
     implementation(libs.androidx.lifecycle.runtime.compose)
-
-
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    // destination
+    implementation(libs.compose.destinations.core)
+    implementation(libs.compose.destinations.bottomSheet)
+    ksp(libs.compose.destinations.ksp)
+    // mmkv
     implementation(libs.mmkv.static)
     implementation(libs.mmkv.ktx)
     implementation(libs.kotlin.serialization.json)
-    implementation(libs.hilt.android)
-    kapt(libs.hilt.android.compiler)
-}
-
-kapt {
-    correctErrorTypes = true
+    // koin
+    implementation(platform(libs.koin.bom))
+    implementation(libs.koin.androidx.compose)
+    implementation(libs.koin.androidx.compose.navigation)
 }
