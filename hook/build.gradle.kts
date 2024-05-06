@@ -11,8 +11,6 @@ android {
 
     defaultConfig {
         minSdk = 24
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
     }
 
@@ -32,9 +30,6 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.majorVersion
     }
-    buildFeatures {
-        buildConfig = true
-    }
 }
 
 dependencies {
@@ -42,7 +37,7 @@ dependencies {
     implementation(libs.androidx.appcompat)
 
     implementation(libs.yuki.api)
-    compileOnly(libs.xposed.api)
+    compileOnlyApi(libs.xposed.api)
     ksp(libs.yuki.ksp.xposed)
 
     implementation(libs.kotlin.serialization.json)

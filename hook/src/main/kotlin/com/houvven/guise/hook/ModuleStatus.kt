@@ -2,4 +2,6 @@ package com.houvven.guise.hook
 
 import com.highcapable.yukihookapi.YukiHookAPI
 
-val ModuleStatus get() = YukiHookAPI.Status
+object ModuleStatus {
+    val isModuleActive = YukiHookAPI.Status.isXposedModuleActive
+}
