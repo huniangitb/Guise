@@ -14,12 +14,15 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.houvven.guise.R
 import com.houvven.guise.data.AppsStore
+import com.houvven.guise.hook.ModuleStatus
 import com.houvven.guise.ui.compontent.AppListItem
+import com.houvven.guise.ui.screen.launch.home.components.ModuleInactiveView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -36,13 +39,20 @@ fun HomeScreen(
         topBar = { HomeTopBar() }
     ) { innerPaddings ->
         Column(
-            verticalArrangement = Arrangement.Top,
-            modifier = Modifier.padding(innerPaddings)
+            modifier = Modifier
+                .padding(top = innerPaddings.calculateTopPadding())
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            AppLazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                appsStore = appsStore
-            )
+            if (ModuleStatus.isModuleActive) {
+                AppLazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    appsStore = appsStore
+                )
+            } else {
+                ModuleInactiveView()
+            }
         }
     }
 }

@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name" translatable="false">Guise</string>
     <string name="home">Home</string>
+    <string name="module_inactive">Inactive</string>
+    <string name="module_inactive_desc">Please enable the module first. If u are using `ROOT free` framework, please go this app\'s settings to select work mode.</string>
+    <string name="module_version">Module Version</string>
+    <string name="android_version">Android Version</string>
+    <string name="os_version">OS Version</string>
+    <string name="device_model">Device Model</string>
+    <string name="support_abi" translatable="false">ABI</string>
 </resources>

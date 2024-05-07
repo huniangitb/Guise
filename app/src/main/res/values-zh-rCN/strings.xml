@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="home">主页</string>
+    <string name="module_version">模块版本</string>
+    <string name="module_inactive">待激活</string>
+    <string name="android_version">安卓版本</string>
+    <string name="os_version">系统版本</string>
+    <string name="device_model">设备型号</string>
+    <string name="module_inactive_desc">请先启用模块。如果您使用的是免ROOT框架，请转到此应用程序的设置以选择工作模式。</string>
 </resources>

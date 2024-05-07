@@ -126,6 +126,7 @@ class AppsStore(
         val totalAppSize: Int = 0,
         val loadedAppSize: Int = 0
     ) {
+        @Suppress("unused")
         val progress: Float get() = loadedAppSize / totalAppSize.toFloat()
 
         val isDoneLoading: Boolean get() = totalAppSize == loadedAppSize

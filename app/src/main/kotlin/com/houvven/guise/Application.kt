@@ -1,6 +1,7 @@
 package com.houvven.guise
 
 import android.util.Log
+import com.houvven.guise.hook.ModuleStatus
 import com.houvven.guise.injection.commonModule
 import com.houvven.guise.injection.storeModule
 import com.houvven.guise.injection.viewModelModule
@@ -18,6 +19,7 @@ class Application : AndroidApplication() {
         super.onCreate()
 
         Log.d(TAG, "uid: $MY_USER_ID")
+        Log.d(TAG, "module_active: ${ModuleStatus.isModuleActive}")
 
         startKoin {
             androidLogger()
