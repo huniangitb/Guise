@@ -52,13 +52,11 @@ class AppsStore(
         val isLoading: Boolean = false
     )
 
-    enum class Member(val storeKey: String, val scanMode: AppScanner.ScanMode) {
+    enum class Member(val scanMode: AppScanner.ScanMode) {
         USER(
-            storeKey = "user_apps",
             scanMode = AppScanner.ScanMode.USER
         ),
         SYSTEM(
-            storeKey = "sys_apps",
             scanMode = AppScanner.ScanMode.SYSTEM
         );
     }
