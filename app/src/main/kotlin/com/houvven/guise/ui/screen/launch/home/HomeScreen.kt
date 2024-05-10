@@ -71,26 +71,43 @@ private fun HomeTopBar(modifier: Modifier = Modifier) {
 @Composable
 private fun AppLazyColumn(
     appsStore: AppsStore,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    navController: NavHostController = LocalNavHostController.current
 ) {
-    val installedApps by appsStore.apps.collectAsStateWithLifecycle(emptyList())
-    val loadState by appsStore.appLoadState.collectAsStateWithLifecycle(AppsStore.AppLoadState())
+    val userAppsState by appsStore.userAppState.collectAsStateWithLifecycle(AppsStore.AppState())
+    val sysAppsState by appsStore.sysAppState.collectAsStateWithLifecycle(AppsStore.AppState())
     val coroutineScope = rememberCoroutineScope()
+    val pagerState = rememberPagerState { AppsStore.Member.entries.size }
 
-    PullToRefreshBox(
-        isRefreshing = loadState.isLoading,
-        onRefresh = {
-            coroutineScope.launch(Dispatchers.Default) {
-                appsStore.loadApps()
-            }
-        },
-        modifier = Modifier.fillMaxSize()
+    HorizontalPager(
+        state = pagerState,
+        pageSize = PageSize.Fill,
+        key = { index -> AppsStore.Member.entries[index].name }
     ) {
-        LazyColumn(
-            modifier = modifier
+        val appsState = when (AppsStore.Member.entries[it]) {
+            AppsStore.Member.USER -> userAppsState
+            AppsStore.Member.SYSTEM -> sysAppsState
+        }
+        PullToRefreshBox(
+            isRefreshing = appsState.isLoading,
+            onRefresh = {
+                coroutineScope.launch(Dispatchers.Default) {
+                    appsStore.loadApp(AppsStore.Member.entries[it])
+                }
+            },
+            modifier = Modifier.fillMaxSize()
         ) {
-            items(installedApps) { app ->
-                AppListItem(app = app)
+            LazyColumn(
+                modifier = modifier
+            ) {
+                items(appsState.apps) { app ->
+                    AppListItem(
+                        app = app,
+                        onClick = {
+                            navController.navigateDirection(AppProfileReviseRouteDestination(app.packageName))
+                        }
+                    )
+                }
             }
         }
     }

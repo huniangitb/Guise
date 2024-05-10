@@ -13,5 +13,7 @@ data class App(
     val packageName: String,
     @IgnoredOnParcel
     val icon: ImageBitmap = EmptyImageBitmap,
+    val versionCode: Long,
+    val versionName: String,
     val isSystemApp: Boolean
 ) : Parcelable
