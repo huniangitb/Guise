@@ -2,8 +2,6 @@ package com.houvven.guise.data
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dylanc.mmkv.IMMKVOwner
-import com.dylanc.mmkv.MMKVOwner
 import com.houvven.guise.util.app.App
 import com.houvven.guise.util.app.AppScanner
 import kotlinx.coroutines.Dispatchers
@@ -14,7 +12,7 @@ import kotlinx.coroutines.launch
 
 class AppsStore(
     private val appScanner: AppScanner
-) : IMMKVOwner by MMKVOwner(ID), ViewModel() {
+) : ViewModel() {
 
     private val _userAppsState = MutableStateFlow(AppState())
     private val _sysAppsState = MutableStateFlow(AppState())
@@ -43,9 +41,6 @@ class AppsStore(
             Member.USER -> _userAppsState
         }
 
-    companion object {
-        const val ID = "apps_store"
-    }
 
     data class AppState(
         val apps: List<App> = emptyList(),
