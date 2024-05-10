@@ -6,6 +6,7 @@ import android.os.Parcelable
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -147,7 +148,7 @@ private fun <T> ProfileReviseItem(
         }
     }
 
-    BadgedBox(badge = badge) {
+    Box {
         val cardColors = colors.run {
             CardDefaults.cardColors(
                 contentColor = contentColor(edited),
@@ -185,6 +186,8 @@ private fun <T> ProfileReviseItem(
                 Text(text = value, style = MaterialTheme.typography.bodyLarge, color = color)
             }
         }
+
+        badge()
     }
 }
 
