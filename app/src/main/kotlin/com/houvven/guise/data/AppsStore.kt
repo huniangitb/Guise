@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.houvven.guise.util.app.App
 import com.houvven.guise.util.app.AppScanner
+import com.houvven.guise.util.app.AppSortComparator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,11 +28,9 @@ class AppsStore(
     suspend fun loadApp(member: Member) {
         val stateFlow = member.stateFlow
         stateFlow.reLoad()
-        appScanner.scanAppsFlowAsUser(member.scanMode).collect { app ->
-            stateFlow.update { state ->
-                state.copy(apps = state.apps + app)
-            }
-        }
+        appScanner.scanAppsAsUser(member.scanMode)
+            .sortedWith(AppSortComparator.AppNameLocaleComparator)
+            .let { apps -> stateFlow.update { it.copy(apps = apps) } }
         stateFlow.doneLoading()
     }
 
@@ -41,11 +40,16 @@ class AppsStore(
             Member.USER -> _userAppsState
         }
 
-
     data class AppState(
         val apps: List<App> = emptyList(),
-        val isLoading: Boolean = false
-    )
+        val isLoading: Boolean = false,
+    ) {
+        fun filter(query: String): List<App> {
+            return if (query.isBlank()) apps else apps.filter { app ->
+                app.name.contains(query, true)
+            }
+        }
+    }
 
     enum class Member(val scanMode: AppScanner.ScanMode) {
         USER(

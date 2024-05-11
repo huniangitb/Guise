@@ -31,7 +31,7 @@ class AppScanner(
      * @return A [Flow] of [App]s.
      */
     suspend fun scanAppsFlow(scanMode: ScanMode = ScanMode.ALL) =
-        scanAppsFlow(packages = installedPackages, scanMode = scanMode)
+        commonScanAppsFlow(packages = installedPackages, scanMode = scanMode)
 
     /**
      * Scans the installed apps for the user and returns a flow of [App]s.
@@ -40,9 +40,9 @@ class AppScanner(
      * @return A [Flow] of [App]s.
      */
     suspend fun scanAppsFlowAsUser(scanMode: ScanMode = ScanMode.ALL) =
-        scanAppsFlow(packages = installedPackagesAsUser, scanMode = scanMode)
+        commonScanAppsFlow(packages = installedPackagesAsUser, scanMode = scanMode)
 
-    private suspend fun scanAppsFlow(
+    private suspend fun commonScanAppsFlow(
         packages: List<PackageInfo>,
         scanMode: ScanMode
     ) = flow {
@@ -53,6 +53,25 @@ class AppScanner(
         }.map {
             emit(createApp(it))
         }
+    }
+
+    suspend fun scanApps(scanMode: ScanMode = ScanMode.ALL) =
+        commonScanApps(packages = installedPackages, scanMode = scanMode)
+
+    suspend fun scanAppsAsUser(scanMode: ScanMode = ScanMode.ALL) =
+        commonScanApps(packages = installedPackagesAsUser, scanMode = scanMode)
+
+    private suspend fun commonScanApps(
+        packages: List<PackageInfo>,
+        scanMode: ScanMode = ScanMode.ALL
+    ) = withContext(Dispatchers.Default) {
+        when (scanMode) {
+            ScanMode.ALL -> packages
+            ScanMode.SYSTEM -> packages.filter { it.isSystemApp }
+            ScanMode.USER -> packages.filter { !it.isSystemApp }
+        }.map {
+            async(context = Dispatchers.Default, start = CoroutineStart.LAZY) { createApp(it) }
+        }.awaitAll()
     }
 
 
