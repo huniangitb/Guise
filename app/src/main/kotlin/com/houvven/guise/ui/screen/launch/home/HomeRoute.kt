@@ -23,8 +23,11 @@ fun HomeRoute(
 @Composable
 fun rememberHomeActions(coordinator: HomeCoordinator): HomeActions {
     return remember(coordinator) {
-        HomeActions(
-            onClick = coordinator::doStuff
-        )
+        coordinator.run {
+            HomeActions(
+                onAppQueryChange = viewModel::onAppQueryChange,
+                onAppClick = ::onAppLick
+            )
+        }
     }
 }

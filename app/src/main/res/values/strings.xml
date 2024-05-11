@@ -8,4 +8,6 @@
     <string name="os_version">OS Version</string>
     <string name="device_model">Device Model</string>
     <string name="support_abi" translatable="false">ABI</string>
+    <string name="search_hint">Please enter your content</string>
+    <string name="cancel">Cancel</string>
 </resources>

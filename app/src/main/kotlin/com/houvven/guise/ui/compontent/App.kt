@@ -18,7 +18,7 @@ import com.houvven.guise.util.app.App
 fun AppListItem(
     app: App,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = {},
+    onClick: (App) -> Unit = {},
     colors: ListItemColors = ListItemDefaults.colors()
 ) {
     ListItem(
@@ -33,7 +33,7 @@ fun AppListItem(
                     .clip(MaterialTheme.shapes.small)
             )
         },
-        modifier = modifier.clickable { onClick.invoke() },
+        modifier = modifier.clickable { onClick.invoke(app) },
         colors = colors
     )
 }
