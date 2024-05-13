@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.DividerDefaults
@@ -24,7 +25,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.res.stringResource
 import com.houvven.guise.R
 import com.houvven.guise.ui.screen.launch.home.HomeActions
@@ -70,7 +70,6 @@ private fun HomeScreenSearchAppBar(
     onSearchChange: (Boolean) -> Unit
 ) = Column {
     val placeholder = stringResource(id = R.string.search_hint)
-    val focusRequester = remember { FocusRequester() }
 
     OutlinedTextField(
         modifier = Modifier
@@ -86,7 +85,10 @@ private fun HomeScreenSearchAppBar(
             TextButton(onClick = { onSearchChange.invoke(false) }) {
                 Text(text = stringResource(id = R.string.cancel))
             }
-        }
+        },
+        keyboardOptions = KeyboardOptions(
+            showKeyboardOnFocus = true
+        )
     )
     HorizontalDivider(color = DividerDefaults.color.copy(alpha = 0.5f))
 

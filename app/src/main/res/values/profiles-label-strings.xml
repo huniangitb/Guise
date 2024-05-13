@@ -1,0 +1,9 @@
+<resources>
+    <string name="system_properties">Sys Prop</string>
+    <string name="brand">Brand</string>
+    <string name="model">Model</string>
+    <string name="device">Device</string>
+    <string name="characteristic">Characteristic</string>
+    <string name="app_info">App Info</string>
+    <string name="version_name">Version Name</string>
+</resources>

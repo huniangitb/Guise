@@ -97,4 +97,5 @@ dependencies {
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.androidx.compose)
     implementation(libs.koin.androidx.compose.navigation)
+    implementation("com.highcapable.betterandroid:system-extension:1.0.1")
 }
