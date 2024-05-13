@@ -30,7 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.highcapable.betterandroid.system.extension.component.getParcelableCompat
-import com.houvven.guise.data.repository.ProfilesPlaceholderRepository
+import com.houvven.guise.data.repository.ProfilesPlaceholderRepo
 import com.houvven.guise.util.app.App
 
 
@@ -89,7 +89,7 @@ fun ProfileRevise(
     )
 
     SideEffect {
-        ProfilesPlaceholderRepository.update(app)
+        ProfilesPlaceholderRepo.update(app)
     }
 }
 
@@ -119,7 +119,7 @@ private fun ProfileReviseEditorSheet(
 
     if (editor != ProfileReviseEditor.None) {
         ModalBottomSheet(
-            onDismissRequest = {state.edit(ProfileReviseEditor.None) },
+            onDismissRequest = { state.edit(ProfileReviseEditor.None) },
             sheetState = sheetState,
             containerColor = containerColor,
             contentColor = contentColor,
@@ -127,6 +127,7 @@ private fun ProfileReviseEditorSheet(
             when (editor) {
                 is ProfileReviseEditor.Text -> editor.EditorContent(state = state)
                 is ProfileReviseEditor.TextNumber<*> -> editor.EditorContent(state = state)
+                is ProfileReviseEditor.Enum<*> -> editor.EditorContent(state = state)
                 else -> Unit
             }
         }
@@ -151,8 +152,13 @@ class ProfileReviseState(
         this.editor = editor
     }
 
-    fun  update(profiles: Profiles) {
+    fun update(profiles: Profiles) {
         profilesState.value = profiles
+    }
+
+    fun updateAndDone(profiles: Profiles) {
+        update(profiles)
+        edit(ProfileReviseEditor.None)
     }
 }
 

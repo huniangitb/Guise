@@ -3,7 +3,9 @@ package com.houvven.guise.ui.screen.profile.components
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.houvven.guise.R
-import com.houvven.guise.data.repository.ProfilesPlaceholderRepository
+import com.houvven.guise.data.domain.ProfileSuggest
+import com.houvven.guise.data.repository.ProfilesPlaceholderRepo
+import com.houvven.guise.data.repository.ProfilesReviseEditorEnumRepo
 import com.houvven.guise.hook.profile.ModuleHookProfiles
 import com.houvven.guise.hook.profile.item.AppInfoProfile
 import com.houvven.guise.hook.profile.item.PropertiesProfile
@@ -32,13 +34,12 @@ sealed class ProfileReviseEditor : ProfileReviseContract() {
     sealed class Editor<T> : ProfileReviseEditor() {
         abstract val label: @Composable () -> String
         abstract val value: Profiles.() -> T?
-        abstract val onValueChange: Profiles.(T?) -> Profiles
+        abstract val onValueClear: Profiles.() -> Profiles
 
         open val display: (T?) -> String = { it.toString() }
-        open val onValueClear: Profiles.() -> Profiles = { onValueChange(null) }
         open val validator: (T?) -> Boolean = { true }
 
-        val placeholder get() = ProfilesPlaceholderRepository.get(value).run(display)
+        val placeholder get() = ProfilesPlaceholderRepo.get(value).run(display)
 
         fun isEdited(profiles: Profiles) = value.invoke(profiles) != null
     }
@@ -46,14 +47,24 @@ sealed class ProfileReviseEditor : ProfileReviseContract() {
     class Text(
         override val label: @Composable () -> String,
         override val value: Profiles.() -> String?,
-        override val onValueChange: Profiles.(String?) -> Profiles
+        val onValueChange: Profiles.(String?) -> Profiles,
+        override val onValueClear: Profiles.() -> Profiles = { onValueChange(null) }
     ) : Editor<String>()
 
     class TextNumber<T : Number>(
         override val label: @Composable () -> String,
         override val value: Profiles.() -> T?,
-        override val onValueChange: Profiles.(T?) -> Profiles,
+        val onValueChange: Profiles.(T?) -> Profiles,
+        override val onValueClear: Profiles.() -> Profiles = { onValueChange(null) },
         val stringToNumber: (String) -> T?,
+    ) : Editor<T>()
+
+    class Enum<T>(
+        override val label: @Composable () -> String,
+        override val value: Profiles.() -> T?,
+        override val onValueClear: Profiles.() -> Profiles,
+        val suggests: List<ProfileSuggest<T>>,
+        val onSelectedChange: Profiles.(ProfileSuggest<T>) -> Profiles,
     ) : Editor<T>()
 }
 
@@ -79,10 +90,12 @@ val ProfileReviseDataList = setOf(
         onValueChange = { properties { copy(device = it) } },
     ),
     // Characteristic
-    ProfileReviseEditor.Text(
+    ProfileReviseEditor.Enum(
         label = { stringResource(id = R.string.characteristic) },
         value = { properties.characteristics },
-        onValueChange = { properties { copy(characteristics = it) } },
+        suggests = ProfilesReviseEditorEnumRepo.characteristics,
+        onValueClear = { properties { copy(characteristics = null) } },
+        onSelectedChange = { properties { copy(characteristics = it.value) } },
     ),
 
     // App Info
