@@ -7,6 +7,7 @@ import com.highcapable.yukihookapi.hook.param.PackageParam
 import com.highcapable.yukihookapi.hook.xposed.proxy.IYukiHookXposedInit
 import com.houvven.guise.hook.hooker.PropertiesHooker
 import com.houvven.guise.hook.profile.ModuleHookProfiles
+import com.houvven.guise.hook.store.impl.SharedPreferenceModuleStore
 
 @InjectYukiHookWithXposed(
     modulePackageName = "com.houvven.guise",
@@ -18,7 +19,9 @@ object HookEntry : IYukiHookXposedInit {
     }
 
     override fun onHook() = encase {
-        val profiles = ModuleHookProfiles.Debug
+        // val profiles = ModuleHookProfiles.Debug
+        val store = SharedPreferenceModuleStore.Hooked(packageParam = this)
+        val profiles = store.get(mainProcessName)
 
         loadApp(isExcludeSelf = true) {
             loadHooker(profiles)

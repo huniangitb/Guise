@@ -11,6 +11,8 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -18,9 +20,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.houvven.guise.data.AppsStore
 import com.houvven.guise.hook.ModuleStatus
+import com.houvven.guise.hook.store.ModuleStore
 import com.houvven.guise.ui.compontent.AppListItem
 import com.houvven.guise.ui.screen.launch.home.components.HomeScreenTopBar
 import com.houvven.guise.ui.screen.launch.home.components.ModuleInactiveView
@@ -66,6 +70,7 @@ private fun AppLazyColumn(
     actions: HomeActions,
     appsStore: AppsStore,
     modifier: Modifier = Modifier,
+    moduleStore: ModuleStore.Hooker = koinInject()
 ) {
     val userAppsState by appsStore.userAppState.collectAsStateWithLifecycle(AppsStore.AppState())
     val sysAppsState by appsStore.sysAppState.collectAsStateWithLifecycle(AppsStore.AppState())
@@ -73,21 +78,22 @@ private fun AppLazyColumn(
     val pagerState = rememberPagerState { AppsStore.Member.entries.size }
     val lazyListState = rememberLazyListState()
 
+    val configuredPackages = moduleStore.configuredPackages
+
     HorizontalPager(
         state = pagerState,
         pageSize = PageSize.Fill,
         key = { index -> AppsStore.Member.entries[index].name }
     ) { pageIndex ->
-        val appsState = when (AppsStore.Member.entries[pageIndex]) {
+        val member = AppsStore.Member.entries[pageIndex]
+        val appsState = when (member) {
             AppsStore.Member.USER -> userAppsState
             AppsStore.Member.SYSTEM -> sysAppsState
         }
         PullToRefreshBox(
             isRefreshing = appsState.isLoading,
             onRefresh = {
-                coroutineScope.launch(Dispatchers.Default) {
-                    appsStore.loadApp(AppsStore.Member.entries[pageIndex])
-                }
+                coroutineScope.launch(Dispatchers.Default) { appsStore.loadApp(member) }
             },
             modifier = Modifier.fillMaxSize()
         ) {
@@ -96,14 +102,23 @@ private fun AppLazyColumn(
                 state = lazyListState
             ) {
                 items(
-                    items = appsState.filter(query = state.appQuery),
+                    items = appsState
+                        .filter(query = state.appQuery)
+                        .sortedBy { it.packageName !in configuredPackages },
                     key = { it.packageName },
                     contentType = { it }
                 ) { app ->
+                    // container color, if the app is configured set to primary container
+                    val containerColor = if (configuredPackages.contains(app.packageName)) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        Color.Unspecified
+                    }
                     AppListItem(
                         app = app,
                         onClick = actions.onAppClick,
-                        modifier = Modifier.animateItem()
+                        modifier = Modifier.animateItem(),
+                        colors = ListItemDefaults.colors(containerColor = containerColor)
                     )
                 }
             }
