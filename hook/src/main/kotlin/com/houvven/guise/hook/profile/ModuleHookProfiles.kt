@@ -1,7 +1,6 @@
 package com.houvven.guise.hook.profile
 
 import android.os.Parcelable
-import android.util.Log
 import com.houvven.guise.hook.profile.item.AppInfoProfile
 import com.houvven.guise.hook.profile.item.PropertiesProfile
 import kotlinx.parcelize.Parcelize
@@ -42,12 +41,7 @@ data class ModuleHookProfiles(
         )
 
         fun fromJsonStr(json: String): ModuleHookProfiles {
-            return try {
-                Json.decodeFromString(serializer(), json)
-            } catch (e: Exception) {
-                Log.e(TAG, "ModuleHookProfiles failed.", e)
-                Empty
-            }
+            return runCatching { Json.decodeFromString(serializer(), json) }.getOrDefault(Empty)
         }
 
     }

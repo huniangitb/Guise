@@ -18,13 +18,15 @@ fun AppProfileReviseRoute(
     appScanner: AppScanner = koinInject(),
     moduleStore: ModuleStore.Hooker = koinInject()
 ) {
+    val app = appScanner.getAppAsUser(packageName) ?: return
+    // todo: add a app not found status page to handler error
+
     val reviseState = rememberProfileReviseState(
         profiles = moduleStore.get(packageName).copy(packageName = packageName)
     )
     val coordinator = rememberAppProfileReviseCoordinator(
-        reviseState = reviseState, moduleStore = moduleStore
+        reviseState = reviseState, moduleStore = moduleStore, app = app
     )
-    val app = appScanner.getAppAsUser(packageName)
 
     // State observing and declarations
     val uiState by coordinator.screenStateFlow.collectAsStateWithLifecycle(AppProfileReviseState())
@@ -33,14 +35,12 @@ fun AppProfileReviseRoute(
     val actions = rememberAppProfileReviseActions(coordinator)
 
     // UI Rendering
-    if (app != null) {
-        AppProfileReviseScreen(
-            state = uiState,
-            actions = actions,
-            app = app,
-            reviseState = reviseState
-        )
-    }
+    AppProfileReviseScreen(
+        state = uiState,
+        actions = actions,
+        app = app,
+        reviseState = reviseState
+    )
 }
 
 

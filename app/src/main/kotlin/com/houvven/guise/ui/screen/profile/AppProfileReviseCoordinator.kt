@@ -5,6 +5,7 @@ import androidx.compose.runtime.remember
 import com.houvven.guise.hook.profile.ModuleHookProfiles
 import com.houvven.guise.hook.store.ModuleStore
 import com.houvven.guise.ui.screen.profile.components.ProfileReviseState
+import com.houvven.guise.util.app.App
 import org.koin.androidx.compose.koinViewModel
 
 /**
@@ -14,7 +15,8 @@ import org.koin.androidx.compose.koinViewModel
 class AppProfileReviseCoordinator(
     val viewModel: AppProfileReviseViewModel,
     val reviseState: ProfileReviseState,
-    val moduleStore: ModuleStore.Hooker
+    val moduleStore: ModuleStore.Hooker,
+    val app: App
 ) {
     val screenStateFlow = viewModel.stateFlow
 
@@ -23,7 +25,7 @@ class AppProfileReviseCoordinator(
     }
 
     fun onClearAll() {
-        reviseState.update(ModuleHookProfiles.Empty)
+        reviseState.update(ModuleHookProfiles.Empty.copy(packageName = app.packageName))
     }
 }
 
@@ -31,13 +33,15 @@ class AppProfileReviseCoordinator(
 fun rememberAppProfileReviseCoordinator(
     reviseState: ProfileReviseState,
     moduleStore: ModuleStore.Hooker,
+    app: App,
     viewModel: AppProfileReviseViewModel = koinViewModel()
 ): AppProfileReviseCoordinator {
     return remember(viewModel) {
         AppProfileReviseCoordinator(
             viewModel = viewModel,
             reviseState = reviseState,
-            moduleStore = moduleStore
+            moduleStore = moduleStore,
+            app = app
         )
     }
 }

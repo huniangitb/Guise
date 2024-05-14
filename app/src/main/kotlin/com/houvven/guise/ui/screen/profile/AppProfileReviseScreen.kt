@@ -69,9 +69,6 @@ private fun AppProfileReviseTopBar(
             IconButton(onClick = actions.onClearAll) {
                 Icon(Icons.Outlined.ClearAll, contentDescription = null)
             }
-            IconButton(onClick = actions.onSave) {
-                Icon(Icons.Outlined.Save, contentDescription = null)
-            }
         }
     }
 
@@ -81,7 +78,9 @@ private fun AppProfileReviseTopBar(
         navigationIcon = { ArrowBackButton() },
         actions = {
             AnimatedVisibility(visible = profiles.isEffective) { dynamicActions.invoke() }
-
+            IconButton(onClick = actions.onSave) {
+                Icon(Icons.Outlined.Save, contentDescription = null)
+            }
         },
         scrollBehavior = scrollBehavior
     )

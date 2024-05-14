@@ -15,7 +15,7 @@ abstract class ModuleStore {
 
     abstract class Hooker : ModuleStore() {
 
-        abstract val enabledPackages: Set<String>
+        abstract val configuredPackages: Set<String>
         abstract fun set(profiles: ModuleHookProfiles)
     }
 }

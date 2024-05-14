@@ -11,7 +11,7 @@ object MediaModuleStore {
 
         private val hooked = MediaModuleStore.Hooked()
 
-        override val enabledPackages: Set<String>
+        override val configuredPackages: Set<String>
             get() = mediaDir.list()?.filter { isEnabled(it) }?.toSet() ?: emptySet()
 
         override fun set(profiles: ModuleHookProfiles) {

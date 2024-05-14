@@ -13,7 +13,7 @@ object SharedPreferenceModuleStore {
 
         private val prefs: YukiHookPrefsBridge = context.prefs(name)
 
-        override val enabledPackages: Set<String>
+        override val configuredPackages: Set<String>
             get() = prefs.all().keys
 
         override fun set(profiles: ModuleHookProfiles) {
