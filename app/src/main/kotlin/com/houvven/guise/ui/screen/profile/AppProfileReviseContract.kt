@@ -10,9 +10,6 @@ class AppProfileReviseState
  * passed to the coordinator to handle
  **/
 data class AppProfileReviseActions(
-    val onClick: () -> Unit = {}
-)
-
-data class AppProfileReviseRouteNavArgs(
-    val packageName: String
+    val onSave: () -> Unit = {},
+    val onClearAll: () -> Unit = {}
 )

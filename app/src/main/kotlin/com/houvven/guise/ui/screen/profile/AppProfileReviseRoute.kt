@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.houvven.guise.hook.store.ModuleStore
+import com.houvven.guise.ui.screen.profile.components.rememberProfileReviseState
 import com.houvven.guise.util.app.AppScanner
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -13,20 +15,31 @@ import org.koin.compose.koinInject
 @Composable
 fun AppProfileReviseRoute(
     packageName: String,
-    coordinator: AppProfileReviseCoordinator = rememberAppProfileReviseCoordinator(),
-    appScanner: AppScanner = koinInject()
+    appScanner: AppScanner = koinInject(),
+    moduleStore: ModuleStore.Hooker = koinInject()
 ) {
+    val reviseState = rememberProfileReviseState(
+        profiles = moduleStore.get(packageName).copy(packageName = packageName)
+    )
+    val coordinator = rememberAppProfileReviseCoordinator(
+        reviseState = reviseState, moduleStore = moduleStore
+    )
+    val app = appScanner.getAppAsUser(packageName)
+
     // State observing and declarations
     val uiState by coordinator.screenStateFlow.collectAsStateWithLifecycle(AppProfileReviseState())
 
     // UI Actions
     val actions = rememberAppProfileReviseActions(coordinator)
 
-    val app = appScanner.getAppAsUser(packageName)
-
     // UI Rendering
     if (app != null) {
-        AppProfileReviseScreen(uiState, actions, app)
+        AppProfileReviseScreen(
+            state = uiState,
+            actions = actions,
+            app = app,
+            reviseState = reviseState
+        )
     }
 }
 
@@ -35,7 +48,8 @@ fun AppProfileReviseRoute(
 fun rememberAppProfileReviseActions(coordinator: AppProfileReviseCoordinator): AppProfileReviseActions {
     return remember(coordinator) {
         AppProfileReviseActions(
-            onClick = coordinator::doStuff
+            onSave = coordinator::onSave,
+            onClearAll = coordinator::onClearAll
         )
     }
 }
