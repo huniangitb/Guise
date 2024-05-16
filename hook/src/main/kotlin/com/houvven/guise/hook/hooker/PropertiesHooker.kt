@@ -100,6 +100,11 @@ internal class PropertiesHooker(profile: PropertiesProfile) :
                 type = BuildPropAscription.BUILD
             ),
             PropertiesHookOption(
+                value = fingerprint,
+                type = BuildPropAscription.BUILD,
+                propertiesKey = "ro.build.fingerprint"
+            ),
+            PropertiesHookOption(
                 value = characteristics,
                 propertiesKey = "ro.build.characteristics"
             )

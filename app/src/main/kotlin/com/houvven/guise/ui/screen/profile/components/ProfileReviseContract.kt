@@ -69,13 +69,18 @@ sealed class ProfileReviseEditor : ProfileReviseContract() {
 }
 
 
-val ProfileReviseDataList = setOf(
+val ProfileReviseDataList = listOf(
     ProfileReviseHeader { stringResource(id = R.string.system_properties) },
     // Brand
     ProfileReviseEditor.Text(
         label = { stringResource(id = R.string.brand) },
         value = { properties.brand },
         onValueChange = { properties { copy(brand = it) } }
+    ),
+    ProfileReviseEditor.Text(
+        label = { stringResource(id = R.string.manufacturer) },
+        value = { properties.manufacturer },
+        onValueChange = { properties { copy(manufacturer = it) } },
     ),
     // Model
     ProfileReviseEditor.Text(
@@ -88,6 +93,11 @@ val ProfileReviseDataList = setOf(
         label = { stringResource(id = R.string.device) },
         value = { properties.device },
         onValueChange = { properties { copy(device = it) } },
+    ),
+    ProfileReviseEditor.Text(
+        label = { stringResource(id = R.string.fingerprint) },
+        value = { properties.fingerprint },
+        onValueChange = { properties { copy(fingerprint = it) } }
     ),
     // Characteristic
     ProfileReviseEditor.Enum(
@@ -113,7 +123,7 @@ val ProfileReviseDataList = setOf(
         onValueChange = { appInfo { copy(versionCode = it) } },
         stringToNumber = { it.toIntOrNull() }
     )
-).toList()
+)
 
 
 private fun Profiles.properties(function: PropertiesProfile.() -> PropertiesProfile) =

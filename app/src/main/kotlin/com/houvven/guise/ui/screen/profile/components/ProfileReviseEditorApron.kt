@@ -85,7 +85,7 @@ private fun BoxScope.EditorApronClearBadge(visible: Boolean, onClear: () -> Unit
         visible = visible,
         modifier = Modifier
             .align(Alignment.TopEnd)
-            .padding(4.dp)
+            .padding(2.dp)
     ) {
         FilledIconButton(
             onClick = onClear,

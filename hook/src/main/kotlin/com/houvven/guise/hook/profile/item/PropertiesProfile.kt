@@ -11,9 +11,11 @@ import kotlinx.serialization.Transient
 @Parcelize
 data class PropertiesProfile(
     val brand: String? = null,
+    val manufacturer: String? = brand,
     val model: String? = null,
     val product: String? = null,
     val device: String? = null,
+    val fingerprint: String? = null,
 
     val characteristics: String? = null,
 
@@ -22,22 +24,10 @@ data class PropertiesProfile(
 
     @IgnoredOnParcel
     @Transient
-    val manufacturer = brand
-
-    @IgnoredOnParcel
-    @Transient
     override val isEffective: Boolean = this != Empty
 
     companion object {
 
-        val Empty =  PropertiesProfile()
-
-        const val UNKNOWN = "unknown"
-
-        const val KEY_BRAND = "ro.product.brand"
-        const val KEY_MODEL = "ro.product.model"
-        const val KEY_MANUFACTURER = "ro.product.manufacturer"
-        const val KEY_PRODUCT = "ro.product.name"
-        const val KEY_DEVICE = "ro.product.device"
+        val Empty = PropertiesProfile()
     }
 }

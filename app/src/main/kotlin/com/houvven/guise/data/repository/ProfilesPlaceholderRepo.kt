@@ -10,15 +10,17 @@ import com.houvven.guise.hook.profile.item.AppInfoProfile
 import com.houvven.guise.hook.profile.item.PropertiesProfile
 import com.houvven.guise.util.app.App
 
-object ProfilesPlaceholderRepository {
+object ProfilesPlaceholderRepo {
 
     private var profiles by mutableStateOf(
         ModuleHookProfiles(
             properties = PropertiesProfile(
                 brand = Build.BRAND,
+                manufacturer = Build.MANUFACTURER,
                 model = Build.MODEL,
                 device = Build.DEVICE,
-                characteristics = SystemProperties.get("ro.build.characteristics")
+                fingerprint = Build.FINGERPRINT,
+                characteristics = SystemProperties.get("ro.build.characteristics"),
             )
         )
     )
