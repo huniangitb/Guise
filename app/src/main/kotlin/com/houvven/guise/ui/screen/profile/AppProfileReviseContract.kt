@@ -11,5 +11,9 @@ class AppProfileReviseState
  **/
 data class AppProfileReviseActions(
     val onSave: () -> Unit = {},
-    val onClearAll: () -> Unit = {}
+    val onClearAll: () -> Unit = {},
+    val onRestart: () -> Unit = {},
+    val onStop: () -> Unit = {},
+    val onClearData: () -> Unit = {},
+    val onCopyToClipboard: () -> Unit = {}
 )

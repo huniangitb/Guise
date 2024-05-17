@@ -5,8 +5,15 @@
     <string name="device">Device</string>
     <string name="characteristic">Characteristic</string>
     <string name="app_info">App Info</string>
+    <string name="version_code">Version Code</string>
     <string name="version_name">Version Name</string>
     <string name="manufacturer">Manufacturer</string>
     <string name="ua" translatable="false">UA</string>
     <string name="fingerprint" translatable="false">Fingerprint</string>
+    <string name="language">Language</string>
+    <string name="night_mode">Night Mode</string>
+    <string name="product">Product</string>
+    <string name="build_display_id">Build ID</string>
+    <string name="density_dpi" translatable="false">DPI</string>
+    <string name="font_scale">Font scale</string>
 </resources>

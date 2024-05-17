@@ -9,8 +9,21 @@
     <string name="device_model">Device Model</string>
     <string name="support_abi" translatable="false">ABI</string>
     <string name="person">Me</string>
-    <string name="version_code">Version Code</string>
     <string name="member_upgrade_promo_title">Upgrade your membership and unlock premium features!</string>
     <string name="search_hint">Please enter your content</string>
     <string name="cancel">Cancel</string>
+    <string name="restart">Restart</string>
+    <string name="stop">Stop</string>
+    <string name="clear_data">Clear Data</string>
+    <string name="required_permissions_root">Root access is required</string>
+    <string name="success">Success</string>
+    <string name="clear_data_click_hint">Dangerous operation, long press required</string>
+    <string name="confirm">Confirm</string>
+    <string name="dangerous_operations">Dangerous Operations</string>
+    <string name="go_ahead">Go ahead</string>
+    <string name="dangerous_operations_hint">By doing so, you acknowledge and accept the possible risks, including data loss, system damage, or legal consequences, and assume your own responsibility. Please proceed with caution after fully understanding and taking precautions.</string>
+    <string name="turn_on">Turn ON</string>
+    <string name="turn_off">Turn Off</string>
+    <string name="copy_to_clipboard">Copy to clipboard</string>
+    <string name="import_from_clipboard">Import from clipboard</string>
 </resources>

@@ -49,7 +49,11 @@ fun rememberAppProfileReviseActions(coordinator: AppProfileReviseCoordinator): A
     return remember(coordinator) {
         AppProfileReviseActions(
             onSave = coordinator::onSave,
-            onClearAll = coordinator::onClearAll
+            onClearAll = coordinator::onClearAll,
+            onRestart = coordinator::onRestart,
+            onStop = coordinator::onStop,
+            onClearData = coordinator::onClearData,
+            onCopyToClipboard = coordinator::onCopyToClipboard
         )
     }
 }

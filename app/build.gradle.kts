@@ -92,10 +92,14 @@ dependencies {
     // mmkv
     implementation(libs.mmkv.static)
     implementation(libs.mmkv.ktx)
-    implementation(libs.kotlin.serialization.json)
     // koin
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.androidx.compose)
     implementation(libs.koin.androidx.compose.navigation)
     implementation("com.highcapable.betterandroid:system-extension:1.0.1")
+
+    implementation(libs.kotlin.serialization.json)
+    implementation(libs.betterandroid.extension.system)
+    implementation(libs.lservice)
+}
 }

@@ -2,6 +2,7 @@ package com.houvven.guise.ui.screen.profile.components
 
 import android.os.Bundle
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -124,11 +125,16 @@ private fun ProfileReviseEditorSheet(
             containerColor = containerColor,
             contentColor = contentColor,
         ) {
-            when (editor) {
-                is ProfileReviseEditor.Text -> editor.EditorContent(state = state)
-                is ProfileReviseEditor.TextNumber<*> -> editor.EditorContent(state = state)
-                is ProfileReviseEditor.Enum<*> -> editor.EditorContent(state = state)
-                else -> Unit
+            Column(
+                verticalArrangement = Arrangement.Top,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 15.dp)
+            ) {
+                when (editor) {
+                    is ProfileReviseEditor.Text -> editor.EditorContent(state = state)
+                    is ProfileReviseEditor.TextNumber<*> -> editor.EditorContent(state = state)
+                    is ProfileReviseEditor.Enum<*> -> editor.EditorContent(state = state)
+                    else -> Unit
+                }
             }
         }
     }

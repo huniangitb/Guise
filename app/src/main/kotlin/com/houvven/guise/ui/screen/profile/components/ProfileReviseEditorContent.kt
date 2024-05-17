@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -51,13 +53,12 @@ fun ProfileReviseEditor.Text.EditorContent(state: ProfileReviseState) {
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth()
     ) {
         TextField(
             value = stagingVar,
             onValueChange = onStagingValueChange,
             placeholder = { Text(text = placeholder) },
-            modifier = Modifier.padding(bottom = 20.dp),
+            modifier = Modifier.fillMaxWidth(),
             trailingIcon = {
                 AnimatedVisibility(visible = isEdited) {
                     IconButton(onClick = { stagingVar = "" }) {
@@ -103,14 +104,13 @@ fun <T : Number> ProfileReviseEditor.TextNumber<T>.EditorContent(state: ProfileR
 
     Column(
         verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth()
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         TextField(
             value = stagingVar,
             onValueChange = onStagingValueChange,
             placeholder = { Text(text = placeholder) },
-            modifier = Modifier.padding(bottom = 20.dp),
+            modifier = Modifier.fillMaxWidth(),
             trailingIcon = {
                 AnimatedVisibility(visible = isEdited) {
                     IconButton(onClick = { stagingVar = "" }) {
@@ -144,25 +144,25 @@ fun <T> ProfileReviseEditor.Enum<T>.EditorContent(state: ProfileReviseState) {
     val onClick: (ProfileSuggest<T>) -> Unit = {
         state.updateAndDone(profiles.onSelectedChange(it))
     }
-
-    suggests.forEach {
-        val selected = value == it.value
-        val containerColor =
-            if (selected) MaterialTheme.colorScheme.primaryContainer
-            else Color.Transparent
-        Card(
-            onClick = { onClick(it) },
-            colors = CardDefaults.cardColors(containerColor = containerColor),
-            modifier = Modifier.padding(horizontal = 16.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
+    LazyColumn {
+        items(items = suggests, key = { it.label + it.value }) {
+            val selected = value == it.value
+            val containerColor =
+                if (selected) MaterialTheme.colorScheme.primaryContainer
+                else Color.Transparent
+            Card(
+                onClick = { onClick(it) },
+                colors = CardDefaults.cardColors(containerColor = containerColor)
             ) {
-                RadioButton(selected = selected, onClick = { onClick(it) })
-                Text(text = it.label)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                ) {
+                    RadioButton(selected = selected, onClick = { onClick(it) })
+                    Text(text = it.label)
+                }
             }
         }
     }

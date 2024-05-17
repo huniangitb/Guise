@@ -7,7 +7,8 @@ import com.houvven.guise.data.domain.ProfileSuggest
 import com.houvven.guise.data.repository.ProfilesPlaceholderRepo
 import com.houvven.guise.data.repository.ProfilesReviseEditorEnumRepo
 import com.houvven.guise.hook.profile.ModuleHookProfiles
-import com.houvven.guise.hook.profile.item.AppInfoProfile
+import com.houvven.guise.hook.profile.item.AppProfile
+import com.houvven.guise.hook.profile.item.AppProfile.PackageInfoProfile
 import com.houvven.guise.hook.profile.item.PropertiesProfile
 
 typealias Profiles = ModuleHookProfiles
@@ -59,13 +60,26 @@ sealed class ProfileReviseEditor : ProfileReviseContract() {
         val stringToNumber: (String) -> T?,
     ) : Editor<T>()
 
-    class Enum<T>(
+    open class Enum<T>(
         override val label: @Composable () -> String,
         override val value: Profiles.() -> T?,
         override val onValueClear: Profiles.() -> Profiles,
         val suggests: List<ProfileSuggest<T>>,
-        val onSelectedChange: Profiles.(ProfileSuggest<T>) -> Profiles,
+        open val onSelectedChange: Profiles.(ProfileSuggest<T>) -> Profiles,
     ) : Editor<T>()
+
+    class BooleanEnum(
+        override val label: @Composable () -> String,
+        override val value: Profiles.() -> Boolean?,
+        override val onValueClear: Profiles.() -> Profiles,
+        override val onSelectedChange: Profiles.(ProfileSuggest<Boolean>) -> Profiles
+    ) : Enum<Boolean>(
+        label = label,
+        value = value,
+        onValueClear = onValueClear,
+        onSelectedChange = onSelectedChange,
+        suggests = ProfilesReviseEditorEnumRepo.boolean
+    )
 }
 
 
@@ -95,9 +109,9 @@ val ProfileReviseDataList = listOf(
         onValueChange = { properties { copy(device = it) } },
     ),
     ProfileReviseEditor.Text(
-        label = { stringResource(id = R.string.fingerprint) },
-        value = { properties.fingerprint },
-        onValueChange = { properties { copy(fingerprint = it) } }
+        label = { stringResource(id = R.string.product) },
+        value = { properties.product },
+        onValueChange = { properties { copy(product = it) } }
     ),
     // Characteristic
     ProfileReviseEditor.Enum(
@@ -107,27 +121,65 @@ val ProfileReviseDataList = listOf(
         onValueClear = { properties { copy(characteristics = null) } },
         onSelectedChange = { properties { copy(characteristics = it.value) } },
     ),
+    ProfileReviseEditor.Text(
+        label = { stringResource(id = R.string.build_display_id) },
+        value = { properties.displayId },
+        onValueChange = { properties { copy(displayId = it) } }
+    ),
+    ProfileReviseEditor.Text(
+        label = { stringResource(id = R.string.fingerprint) },
+        value = { properties.fingerprint },
+        onValueChange = { properties { copy(fingerprint = it) } }
+    ),
 
     // App Info
     ProfileReviseHeader { stringResource(id = R.string.app_info) },
     // App Version Name
     ProfileReviseEditor.Text(
         label = { stringResource(id = R.string.version_name) },
-        value = { appInfo.versionName },
-        onValueChange = { appInfo { copy(versionName = it) } },
+        value = { app.packageInfo.versionName },
+        onValueChange = { packageInfo { copy(versionName = it) } },
     ),
     // App Version Code
     ProfileReviseEditor.TextNumber(
         label = { stringResource(id = R.string.version_code) },
-        value = { appInfo.versionCode },
-        onValueChange = { appInfo { copy(versionCode = it) } },
+        value = { app.packageInfo.versionCode },
+        onValueChange = { packageInfo { copy(versionCode = it) } },
         stringToNumber = { it.toIntOrNull() }
-    )
+    ),
+    ProfileReviseEditor.Enum(
+        label = { stringResource(id = R.string.language) },
+        value = { app.language },
+        suggests = ProfilesReviseEditorEnumRepo.language,
+        onValueClear = { app { copy(language = null) } },
+        onSelectedChange = { app { copy(language = it.value) } }
+    ),
+    ProfileReviseEditor.BooleanEnum(
+        label = { stringResource(id = R.string.night_mode) },
+        value = { app.nightMode },
+        onValueClear = { app { copy(nightMode = null) } },
+        onSelectedChange = { app { copy(nightMode = it.value) } }
+    ),
+    ProfileReviseEditor.TextNumber(
+        label = { stringResource(id = R.string.density_dpi) },
+        value = { app.densityDpi },
+        onValueChange = { app { copy(densityDpi = it) } },
+        stringToNumber = { it.toIntOrNull() }
+    ),
+    ProfileReviseEditor.TextNumber(
+        label = { stringResource(id = R.string.font_scale) },
+        value = { app.fontScale },
+        onValueChange = { app { copy(fontScale = it) } },
+        stringToNumber = { it.toFloatOrNull() }
+    ),
 )
 
 
 private fun Profiles.properties(function: PropertiesProfile.() -> PropertiesProfile) =
     copy(properties = properties.function())
 
-private fun Profiles.appInfo(function: AppInfoProfile.() -> AppInfoProfile) =
-    copy(appInfo = appInfo.function())
+private fun Profiles.app(function: AppProfile.() -> AppProfile) =
+    copy(app = app.function())
+
+private fun Profiles.packageInfo(function: PackageInfoProfile.() -> PackageInfoProfile) =
+    app { copy(packageInfo = packageInfo.function()) }

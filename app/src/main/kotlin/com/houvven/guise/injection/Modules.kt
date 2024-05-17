@@ -19,11 +19,11 @@ val commonModule = module {
         AppScanner(
             androidContext().packageManager,
             setOf(
-                BuildConfig.APPLICATION_ID
+                BuildConfig.APPLICATION_ID,
+                "android"
             )
         )
     }
-
 }
 
 val storeModule = module {
