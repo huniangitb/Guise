@@ -1,7 +1,7 @@
 package com.houvven.guise.hook.profile
 
 import android.os.Parcelable
-import com.houvven.guise.hook.profile.item.AppInfoProfile
+import com.houvven.guise.hook.profile.item.AppProfile
 import com.houvven.guise.hook.profile.item.PropertiesProfile
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
@@ -15,7 +15,7 @@ data class ModuleHookProfiles(
     @Transient
     val packageName: String? = null,
     val properties: PropertiesProfile = PropertiesProfile.Empty,
-    val appInfo: AppInfoProfile = AppInfoProfile.Empty
+    val app: AppProfile = AppProfile.Empty
 ) : HookProfile, Parcelable {
 
     override val isEffective: Boolean

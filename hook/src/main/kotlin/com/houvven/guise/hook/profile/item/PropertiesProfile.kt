@@ -15,6 +15,7 @@ data class PropertiesProfile(
     val model: String? = null,
     val product: String? = null,
     val device: String? = null,
+    val displayId: String? = null,
     val fingerprint: String? = null,
 
     val characteristics: String? = null,

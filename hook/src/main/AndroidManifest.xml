@@ -7,12 +7,9 @@
             android:value="true" />
         <meta-data
             android:name="xposeddescription"
-            android:value="填写你的 Xposed 模块描述" />
+            android:value="God only knows" />
         <meta-data
             android:name="xposedminversion"
             android:value="93" />
-        <meta-data
-            android:name="xposedsharedprefs"
-            android:value="true" />
     </application>
 </manifest>

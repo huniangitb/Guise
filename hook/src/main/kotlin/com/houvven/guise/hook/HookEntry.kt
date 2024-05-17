@@ -5,6 +5,7 @@ import com.highcapable.yukihookapi.hook.factory.configs
 import com.highcapable.yukihookapi.hook.factory.encase
 import com.highcapable.yukihookapi.hook.param.PackageParam
 import com.highcapable.yukihookapi.hook.xposed.proxy.IYukiHookXposedInit
+import com.houvven.guise.hook.hooker.AppHooker
 import com.houvven.guise.hook.hooker.PropertiesHooker
 import com.houvven.guise.hook.profile.ModuleHookProfiles
 import com.houvven.guise.hook.store.impl.SharedPreferenceModuleStore
@@ -16,6 +17,7 @@ import com.houvven.guise.hook.store.impl.SharedPreferenceModuleStore
 object HookEntry : IYukiHookXposedInit {
 
     override fun onInit() = configs {
+        isDebug = false
     }
 
     override fun onHook() = encase {
@@ -24,13 +26,14 @@ object HookEntry : IYukiHookXposedInit {
         val profiles = store.get(mainProcessName)
 
         loadApp(isExcludeSelf = true) {
-            loadHooker(profiles)
+            doLoadHooker(profiles)
         }
     }
 
-    private fun PackageParam.loadHooker(profile: ModuleHookProfiles) {
+    private fun PackageParam.doLoadHooker(profile: ModuleHookProfiles) {
         with(profile) {
             loadHooker(PropertiesHooker(properties))
+            loadHooker(AppHooker(app))
         }
     }
 
