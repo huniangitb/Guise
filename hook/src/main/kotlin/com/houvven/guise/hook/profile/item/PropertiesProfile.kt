@@ -1,14 +1,9 @@
 package com.houvven.guise.hook.profile.item
 
-import android.os.Parcelable
-import com.houvven.guise.hook.profile.HookProfile
-import kotlinx.parcelize.IgnoredOnParcel
-import kotlinx.parcelize.Parcelize
+import com.houvven.guise.hook.profile.Profile
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 
 @Serializable
-@Parcelize
 data class PropertiesProfile(
     val brand: String? = null,
     val manufacturer: String? = brand,
@@ -21,11 +16,9 @@ data class PropertiesProfile(
     val characteristics: String? = null,
 
     val customProperties: Map<String, String> = emptyMap()
-) : HookProfile, Parcelable {
+) : Profile {
 
-    @IgnoredOnParcel
-    @Transient
-    override val isEffective: Boolean = this != Empty
+    override val isAvailable: Boolean = this != Empty
 
     companion object {
 
