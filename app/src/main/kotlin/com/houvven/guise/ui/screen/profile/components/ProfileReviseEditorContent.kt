@@ -19,6 +19,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -29,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -37,12 +39,12 @@ import com.houvven.guise.data.domain.ProfileSuggest
 @Composable
 fun ProfileReviseEditor.Text.EditorContent(state: ProfileReviseState) {
     val profiles by state.profilesState
-    var stagingVar by remember { mutableStateOf(value.invoke(profiles) ?: "") }
+    val originValue = value.invoke(profiles) ?: ""
+    var stagingVar by remember { mutableStateOf(originValue) }
     val isEdited = stagingVar.isNotBlank()
 
     val onStagingValueChange: (String) -> Unit = {
-        if (validator(it))
-            stagingVar = it
+        if (validator(it)) stagingVar = it
     }
 
     val onDone = {
@@ -54,6 +56,14 @@ fun ProfileReviseEditor.Text.EditorContent(state: ProfileReviseState) {
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        AnimatedVisibility(
+            visible = stagingVar != originValue,
+            modifier = Modifier.align(Alignment.End)
+        ) {
+            TextButton(onClick = onDone) {
+                Text(text = stringResource(id = androidx.appcompat.R.string.abc_action_mode_done))
+            }
+        }
         TextField(
             value = stagingVar,
             onValueChange = onStagingValueChange,
@@ -87,13 +97,14 @@ fun ProfileReviseEditor.Text.EditorContent(state: ProfileReviseState) {
 @Composable
 fun <T : Number> ProfileReviseEditor.TextNumber<T>.EditorContent(state: ProfileReviseState) {
     val profiles by state.profilesState
-    var stagingVar by remember { mutableStateOf(value.invoke(profiles)?.toString() ?: "") }
+    val originValue = value.invoke(profiles)?.toString() ?: ""
+    var stagingVar by remember { mutableStateOf(originValue) }
     val isEdited = stagingVar.isNotBlank()
 
     // string to number
     val number = stringToNumber(stagingVar)
     val onStagingValueChange: (String) -> Unit = {
-        if (it.isNotBlank() && validator(number)) {
+        if (it.isBlank() || validator(number)) {
             stagingVar = it
         }
     }
@@ -106,6 +117,14 @@ fun <T : Number> ProfileReviseEditor.TextNumber<T>.EditorContent(state: ProfileR
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        AnimatedVisibility(
+            visible = originValue != stagingVar,
+            modifier = Modifier.align(Alignment.End)
+        ) {
+            TextButton(onClick = onDone) {
+                Text(text = stringResource(id = androidx.appcompat.R.string.abc_action_mode_done))
+            }
+        }
         TextField(
             value = stagingVar,
             onValueChange = onStagingValueChange,
