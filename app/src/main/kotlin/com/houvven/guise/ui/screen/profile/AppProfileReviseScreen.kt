@@ -155,7 +155,7 @@ private fun AppProfileReviseTopBar(
         title = { Text(text = app.name) },
         navigationIcon = { ArrowBackButton() },
         actions = {
-            AnimatedVisibility(visible = profiles.isEffective) { dynamicActions.invoke() }
+            AnimatedVisibility(visible = profiles.isAvailable) { dynamicActions.invoke() }
             IconButton(onClick = actions.onSave) {
                 Icon(Icons.Outlined.Save, contentDescription = null)
             }

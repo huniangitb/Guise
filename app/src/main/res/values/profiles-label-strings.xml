@@ -16,4 +16,9 @@
     <string name="build_display_id">Build ID</string>
     <string name="density_dpi" translatable="false">DPI</string>
     <string name="font_scale">Font scale</string>
+    <string name="resource_configuration">Resource Configuration</string>
+    <string name="longitude">Longitude</string>
+    <string name="latitude">Latitude</string>
+    <string name="location">Location</string>
+    <string name="base_station">Base station</string>
 </resources>

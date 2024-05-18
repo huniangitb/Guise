@@ -30,7 +30,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.highcapable.betterandroid.system.extension.component.getParcelableCompat
 import com.houvven.guise.data.repository.ProfilesPlaceholderRepo
 import com.houvven.guise.util.app.App
 
@@ -189,14 +188,15 @@ object ProfileReviseDefaults {
         val KEY_PROFILES = "profiles"
 
         override fun restore(value: Bundle): ProfileReviseState {
-            val profiles = value.getParcelableCompat<Profiles>("") ?: Profiles.Empty
+            val profiles = value.getString(KEY_PROFILES, "").let { Profiles.fromJsonStr(it) }
             return ProfileReviseState(profiles)
         }
 
         override fun SaverScope.save(value: ProfileReviseState): Bundle {
             val bundle = Bundle()
             // Save the primitive data types from ProfileReviseState
-            bundle.putParcelable(KEY_PROFILES, value.profilesState.value)
+            val profiles by value.profilesState
+            bundle.putString(KEY_PROFILES, profiles.toJsonStr())
             return bundle
         }
     }

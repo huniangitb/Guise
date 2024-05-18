@@ -13,4 +13,9 @@
     <string name="product">产品</string>
     <string name="build_display_id">构建ID</string>
     <string name="font_scale">字体比例</string>
+    <string name="resource_configuration">资源配置</string>
+    <string name="longitude">经度</string>
+    <string name="latitude">纬度</string>
+    <string name="location">定位</string>
+    <string name="base_station">基站</string>
 </resources>

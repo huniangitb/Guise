@@ -6,12 +6,10 @@ import com.houvven.guise.R
 import com.houvven.guise.data.domain.ProfileSuggest
 import com.houvven.guise.data.repository.ProfilesPlaceholderRepo
 import com.houvven.guise.data.repository.ProfilesReviseEditorEnumRepo
-import com.houvven.guise.hook.profile.ModuleHookProfiles
-import com.houvven.guise.hook.profile.item.AppProfile
-import com.houvven.guise.hook.profile.item.AppProfile.PackageInfoProfile
+import com.houvven.guise.hook.profile.HookProfiles
 import com.houvven.guise.hook.profile.item.PropertiesProfile
 
-typealias Profiles = ModuleHookProfiles
+typealias Profiles = HookProfiles
 
 sealed class ProfileReviseContract {
     open val span = ProfileReviseColumSpan.DEFAULT
@@ -137,49 +135,80 @@ val ProfileReviseDataList = listOf(
     // App Version Name
     ProfileReviseEditor.Text(
         label = { stringResource(id = R.string.version_name) },
-        value = { app.packageInfo.versionName },
-        onValueChange = { packageInfo { copy(versionName = it) } },
+        value = { versionName },
+        onValueChange = { copy(versionName = it) },
     ),
     // App Version Code
     ProfileReviseEditor.TextNumber(
         label = { stringResource(id = R.string.version_code) },
-        value = { app.packageInfo.versionCode },
-        onValueChange = { packageInfo { copy(versionCode = it) } },
+        value = { versionCode },
+        onValueChange = { copy(versionCode = it) },
         stringToNumber = { it.toIntOrNull() }
     ),
+
+    // Resource Configuration
+    ProfileReviseHeader { stringResource(id = R.string.resource_configuration) },
     ProfileReviseEditor.Enum(
         label = { stringResource(id = R.string.language) },
-        value = { app.language },
+        value = { language },
         suggests = ProfilesReviseEditorEnumRepo.language,
-        onValueClear = { app { copy(language = null) } },
-        onSelectedChange = { app { copy(language = it.value) } }
+        onValueClear = { copy(language = null) },
+        onSelectedChange = { copy(language = it.value) }
     ),
     ProfileReviseEditor.BooleanEnum(
         label = { stringResource(id = R.string.night_mode) },
-        value = { app.nightMode },
-        onValueClear = { app { copy(nightMode = null) } },
-        onSelectedChange = { app { copy(nightMode = it.value) } }
+        value = { nightMode },
+        onValueClear = { copy(nightMode = null) },
+        onSelectedChange = { copy(nightMode = it.value) }
     ),
     ProfileReviseEditor.TextNumber(
         label = { stringResource(id = R.string.density_dpi) },
-        value = { app.densityDpi },
-        onValueChange = { app { copy(densityDpi = it) } },
+        value = { densityDpi },
+        onValueChange = { copy(densityDpi = it) },
         stringToNumber = { it.toIntOrNull() }
     ),
     ProfileReviseEditor.TextNumber(
         label = { stringResource(id = R.string.font_scale) },
-        value = { app.fontScale },
-        onValueChange = { app { copy(fontScale = it) } },
+        value = { fontScale },
+        onValueChange = { copy(fontScale = it) },
         stringToNumber = { it.toFloatOrNull() }
     ),
-)
 
+    // Location
+    ProfileReviseHeader { stringResource(id = R.string.location) },
+    ProfileReviseEditor.TextNumber(
+        label = { stringResource(id = R.string.longitude) },
+        value = { longitude },
+        onValueChange = { copy(longitude = it) },
+        stringToNumber = { it.toDoubleOrNull() }
+    ),
+    ProfileReviseEditor.TextNumber(
+        label = { stringResource(id = R.string.latitude) },
+        value = { latitude },
+        onValueChange = { copy(latitude = it) },
+        stringToNumber = { it.toDoubleOrNull() }
+    ),
+
+    ProfileReviseHeader { stringResource(id = R.string.base_station) },
+    ProfileReviseEditor.TextNumber(
+        label = { "Cid" },
+        value = { cid },
+        onValueChange = { copy(cid = it) },
+        stringToNumber = { it.toLongOrNull() }
+    ),
+    ProfileReviseEditor.TextNumber(
+        label = { "Lac" },
+        value = { lac },
+        onValueChange = { copy(lac = it) },
+        stringToNumber = { it.toIntOrNull() }
+    ),
+    ProfileReviseEditor.TextNumber(
+        label = { "Pci" },
+        value = { pci },
+        onValueChange = { copy(pci = it) },
+        stringToNumber = { it.toIntOrNull() }
+    )
+)
 
 private fun Profiles.properties(function: PropertiesProfile.() -> PropertiesProfile) =
     copy(properties = properties.function())
-
-private fun Profiles.app(function: AppProfile.() -> AppProfile) =
-    copy(app = app.function())
-
-private fun Profiles.packageInfo(function: PackageInfoProfile.() -> PackageInfoProfile) =
-    app { copy(packageInfo = packageInfo.function()) }

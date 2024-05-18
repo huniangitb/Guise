@@ -8,7 +8,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.highcapable.betterandroid.system.extension.component.clipboardManager
 import com.highcapable.betterandroid.system.extension.component.copy
 import com.houvven.guise.R
-import com.houvven.guise.hook.profile.ModuleHookProfiles
+import com.houvven.guise.hook.profile.HookProfiles
 import com.houvven.guise.hook.store.ModuleStore
 import com.houvven.guise.ui.screen.profile.components.ProfileReviseState
 import com.houvven.guise.util.app.App
@@ -38,7 +38,7 @@ class AppProfileReviseCoordinator(
     }
 
     fun onClearAll() {
-        reviseState.update(ModuleHookProfiles.Empty.copy(packageName = app.packageName))
+        reviseState.update(HookProfiles.Empty.copy(packageName = app.packageName))
     }
 
     fun onRestart() {
