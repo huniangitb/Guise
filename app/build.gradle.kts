@@ -1,3 +1,6 @@
+import com.android.build.gradle.internal.api.BaseVariantOutputImpl
+import org.jetbrains.kotlin.konan.properties.loadProperties
+
 plugins {
     kotlin("kapt")
     alias(libs.plugins.android.application)
@@ -5,6 +8,7 @@ plugins {
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.lsplugin.apksign)
 }
 
 android {
@@ -15,15 +19,22 @@ android {
         applicationId = namespace
         minSdk = 24
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        val version = loadProperties(file("version.properties").path)
+        versionCode = version.getProperty("version.code").toInt()
+        versionName = version.getProperty("version.name")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
     }
-
+    signingConfigs {
+        all {
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
+        }
+    }
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -57,8 +68,12 @@ android {
             isEnable = true
             isUniversalApk = true
             reset()
-            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            include("arm64-v8a", "x86_64")
         }
+    }
+    buildOutputs.all {
+        this as BaseVariantOutputImpl
+        outputFileName = "${rootProject.name}-${name}.apk"
     }
 }
 
@@ -96,10 +111,15 @@ dependencies {
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.androidx.compose)
     implementation(libs.koin.androidx.compose.navigation)
-    implementation("com.highcapable.betterandroid:system-extension:1.0.1")
 
     implementation(libs.kotlin.serialization.json)
     implementation(libs.betterandroid.extension.system)
     implementation(libs.lservice)
 }
+
+apksign {
+    this.storeFileProperty = "sign.store.file"
+    this.storePasswordProperty = "sign.store.password"
+    this.keyAliasProperty = "sign.key.alias"
+    this.keyPasswordProperty = "sign.key.password"
 }

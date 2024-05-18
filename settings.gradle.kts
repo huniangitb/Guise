@@ -16,6 +16,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        mavenLocal()
         maven("https://jitpack.io")
         maven("https://api.xposed.info/")
         maven("https://s01.oss.sonatype.org/content/repositories/releases/")
