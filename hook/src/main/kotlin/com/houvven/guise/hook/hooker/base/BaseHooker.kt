@@ -7,7 +7,7 @@ import com.houvven.guise.hook.profile.Profile
 internal abstract class BaseHooker<T : Profile>
 internal constructor(protected val profile: T) : YukiBaseHooker() {
 
-    private val isEffective = profile.isAvailable
+    protected open val isEffective = profile.isAvailable
 
     override fun onHook() {
         if (isEffective) {

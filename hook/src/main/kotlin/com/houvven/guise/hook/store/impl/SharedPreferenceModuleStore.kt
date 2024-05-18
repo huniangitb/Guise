@@ -4,7 +4,7 @@ import android.content.Context
 import com.highcapable.yukihookapi.hook.factory.prefs
 import com.highcapable.yukihookapi.hook.param.PackageParam
 import com.highcapable.yukihookapi.hook.xposed.prefs.YukiHookPrefsBridge
-import com.houvven.guise.hook.profile.ModuleHookProfiles
+import com.houvven.guise.hook.profile.HookProfiles
 import com.houvven.guise.hook.store.ModuleStore
 
 object SharedPreferenceModuleStore {
@@ -16,17 +16,17 @@ object SharedPreferenceModuleStore {
         override val configuredPackages: Set<String>
             get() = prefs.all().keys
 
-        override fun set(profiles: ModuleHookProfiles) {
+        override fun set(profiles: HookProfiles) {
             prefs.edit {
                 with(profiles) {
-                    if (isEffective) putString(packageName!!, profiles.toJsonStr())
+                    if (isAvailable) putString(packageName!!, profiles.toJsonStr())
                     else remove(packageName!!)
                 }
             }
         }
 
-        override fun get(packageName: String): ModuleHookProfiles {
-            return ModuleHookProfiles.fromJsonStr(prefs.getString(packageName))
+        override fun get(packageName: String): HookProfiles {
+            return HookProfiles.fromJsonStr(prefs.getString(packageName))
         }
 
         override fun isEnabled(packageName: String): Boolean {
@@ -39,8 +39,8 @@ object SharedPreferenceModuleStore {
 
         private val prefs: YukiHookPrefsBridge = packageParam.prefs(name)
 
-        override fun get(packageName: String): ModuleHookProfiles {
-            return ModuleHookProfiles.fromJsonStr(prefs.getString(packageName))
+        override fun get(packageName: String): HookProfiles {
+            return HookProfiles.fromJsonStr(prefs.getString(packageName))
         }
 
         override fun isEnabled(packageName: String): Boolean {

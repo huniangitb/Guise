@@ -1,7 +1,7 @@
 package com.houvven.guise.hook.store.impl
 
 import android.os.Environment
-import com.houvven.guise.hook.profile.ModuleHookProfiles
+import com.houvven.guise.hook.profile.HookProfiles
 import com.houvven.guise.hook.store.ModuleStore
 import java.io.File
 
@@ -14,12 +14,12 @@ object MediaModuleStore {
         override val configuredPackages: Set<String>
             get() = mediaDir.list()?.filter { isEnabled(it) }?.toSet() ?: emptySet()
 
-        override fun set(profiles: ModuleHookProfiles) {
+        override fun set(profiles: HookProfiles) {
             if (profiles.packageName == null) {
                 error("profiles 's package name undefined.")
             }
             val file = getStoreFileAsPackage(profiles.packageName, name)
-            if (profiles.isEffective) {
+            if (profiles.isAvailable) {
                 file.takeUnless { it.exists() }?.createNewFile()
                 file.writeText(profiles.toJsonStr())
             } else {
@@ -35,14 +35,14 @@ object MediaModuleStore {
 
     class Hooked : ModuleStore.Hooked() {
 
-        override fun get(packageName: String): ModuleHookProfiles {
+        override fun get(packageName: String): HookProfiles {
             val json = getStoreFileAsPackage(packageName, name)
                 .takeUnless { it.exists() }?.readText()
 
             if (json.isNullOrBlank()) {
-                return ModuleHookProfiles.Empty
+                return HookProfiles.Empty
             }
-            return ModuleHookProfiles.fromJsonStr(json)
+            return HookProfiles.fromJsonStr(json)
         }
 
         override fun isEnabled(packageName: String): Boolean {
