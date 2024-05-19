@@ -19,7 +19,7 @@ internal class GnssStatusHooker : YukiBaseHooker() {
             "registerGnssNavigationMessageCallback",
             "registerAntennaInfoListener"
         ).forEach {
-            LocationManagerClass.method { name(it) }.hookAll().replaceToFalse()
+            LocationManagerClass.method { name(it) }.hookAll().replaceToTrue()
         }
     }
 

@@ -15,7 +15,7 @@ import com.houvven.guise.hook.util.CellIdentityTdscdmaClass
 import com.houvven.guise.hook.util.CellIdentityWcdmaClass
 import com.houvven.guise.hook.util.TelephonyManagerClass
 
-internal class CellLocationHooker(profiles: HookProfiles) : BaseHooker.Default(profiles) {
+internal class CellHooker(profiles: HookProfiles) : BaseHooker.Default(profiles) {
 
     override fun doHook() {
         this.hookCellIdentity()

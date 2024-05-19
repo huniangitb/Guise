@@ -3,7 +3,6 @@ package com.houvven.guise.hook.hooker.location
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
-import android.os.Build
 import com.highcapable.betterandroid.system.extension.tool.SystemVersion
 import com.highcapable.yukihookapi.hook.factory.allMethods
 import com.highcapable.yukihookapi.hook.factory.method
@@ -24,7 +23,7 @@ internal class LocationHooker(profile: HookProfiles) : BaseHooker.Default(profil
     ) { LocationManager.FUSED_PROVIDER }
 
     override fun doHook() {
-        // loadHooker(GnssStatusHooker())
+        loadHooker(GnssStatusHooker())
         this.hookLocationRequestUpdates()
         this.hookProviderStateGetter()
         this.hookLastKnownLocationGetter()
@@ -55,19 +54,11 @@ internal class LocationHooker(profile: HookProfiles) : BaseHooker.Default(profil
                             val proxyArgs = args.toMutableList().apply {
                                 set(locationIndex, provideLocation)
                             }.toTypedArray()
-                            method.invoke(listener, *proxyArgs)
+                            return@newProxyInstance method.invoke(listener, *proxyArgs)
                         }
+                        return@newProxyInstance method.invoke(listener, *args)
                     }
                     args[index] = proxyInstance
-                }
-
-                after {
-                    val listener = args[index] as LocationListener
-                    val location = provideLocation()
-                    listener.onLocationChanged(location)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        listener.onLocationChanged(listOf(location))
-                    }
                 }
             }
         }
@@ -84,6 +75,10 @@ internal class LocationHooker(profile: HookProfiles) : BaseHooker.Default(profil
             method { name = "isLocationEnabled" }.hookAll().replaceToTrue()
             method { name = "isProviderEnabledForUser" }.hookAll().replaceToTrue()
             method { name = "getBestProvider" }.hookAll().replaceTo(LocationManager.GPS_PROVIDER)
+            method { name = "getProviders" }.hookAll().after {
+                val providers = result as List<*>? ?: return@after
+                result = providers.toMutableSet().add(LocationManager.GPS_PROVIDER)
+            }
         }
     }
 
@@ -103,7 +98,7 @@ internal class LocationHooker(profile: HookProfiles) : BaseHooker.Default(profil
     }
 
     private fun provideLocation(location: Location = Location(locationProvider)): Location {
-        return Location(location).apply {
+        return location.apply {
             longitude = profile.longitude ?: longitude
             latitude = profile.latitude ?: latitude
             time = System.currentTimeMillis()
