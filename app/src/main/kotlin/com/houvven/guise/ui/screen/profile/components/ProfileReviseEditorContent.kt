@@ -23,12 +23,15 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -42,6 +45,7 @@ fun ProfileReviseEditor.Text.EditorContent(state: ProfileReviseState) {
     val originValue = value.invoke(profiles) ?: ""
     var stagingVar by remember { mutableStateOf(originValue) }
     val isEdited = stagingVar.isNotBlank()
+    val focusRequester = remember { FocusRequester() }
 
     val onStagingValueChange: (String) -> Unit = {
         if (validator(it)) stagingVar = it
@@ -68,7 +72,9 @@ fun ProfileReviseEditor.Text.EditorContent(state: ProfileReviseState) {
             value = stagingVar,
             onValueChange = onStagingValueChange,
             placeholder = { Text(text = placeholder) },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(focusRequester),
             trailingIcon = {
                 AnimatedVisibility(visible = isEdited) {
                     IconButton(onClick = { stagingVar = "" }) {
@@ -90,6 +96,10 @@ fun ProfileReviseEditor.Text.EditorContent(state: ProfileReviseState) {
                 focusedSupportingTextColor = Color.Transparent
             )
         )
+
+        SideEffect {
+            focusRequester.requestFocus()
+        }
     }
 }
 
@@ -100,6 +110,7 @@ fun <T : Number> ProfileReviseEditor.TextNumber<T>.EditorContent(state: ProfileR
     val originValue = value.invoke(profiles)?.toString() ?: ""
     var stagingVar by remember { mutableStateOf(originValue) }
     val isEdited = stagingVar.isNotBlank()
+    val focusRequester = remember { FocusRequester() }
 
     // string to number
     val number = stringToNumber(stagingVar)
@@ -129,7 +140,9 @@ fun <T : Number> ProfileReviseEditor.TextNumber<T>.EditorContent(state: ProfileR
             value = stagingVar,
             onValueChange = onStagingValueChange,
             placeholder = { Text(text = placeholder) },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(focusRequester),
             trailingIcon = {
                 AnimatedVisibility(visible = isEdited) {
                     IconButton(onClick = { stagingVar = "" }) {

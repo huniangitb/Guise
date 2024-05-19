@@ -1,7 +1,6 @@
 package com.houvven.guise.ui.screen.launch.home.components
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -20,11 +19,14 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import com.houvven.guise.R
 import com.houvven.guise.ui.screen.launch.home.HomeActions
@@ -39,11 +41,9 @@ fun HomeScreenTopBar(
     var isSearching by remember { mutableStateOf(false) }
     val onSearchChange: (Boolean) -> Unit = { isSearching = it }
 
-    AnimatedContent(targetState = isSearching, label = "AnimatedContentHomeTopBar") {
-        when (it) {
-            false -> HomeScreenTopAppBar(onSearchChange)
-            true -> HomeScreenSearchAppBar(state, actions, onSearchChange)
-        }
+    when (isSearching) {
+        false -> HomeScreenTopAppBar(onSearchChange)
+        true -> HomeScreenSearchAppBar(state, actions, onSearchChange)
     }
 }
 
@@ -70,11 +70,13 @@ private fun HomeScreenSearchAppBar(
     onSearchChange: (Boolean) -> Unit
 ) = Column {
     val placeholder = stringResource(id = R.string.search_hint)
+    val focusRequester = remember { FocusRequester() }
 
     OutlinedTextField(
         modifier = Modifier
             .statusBarsPadding()
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .focusRequester(focusRequester),
         value = state.appQuery,
         onValueChange = actions.onAppQueryChange,
         placeholder = { Text(text = placeholder) },
@@ -90,6 +92,11 @@ private fun HomeScreenSearchAppBar(
             showKeyboardOnFocus = true
         )
     )
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+
     HorizontalDivider(color = DividerDefaults.color.copy(alpha = 0.5f))
 
     BackHandler {

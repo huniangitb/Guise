@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.houvven.guise.data.repository.ProfilesPlaceholderRepo
+import com.houvven.guise.ui.screen.profile.components.ProfileReviseEditor.Editor
 import com.houvven.guise.util.app.App
 
 
@@ -47,7 +48,6 @@ fun ProfileRevise(
     columns: Int = 2,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
     LazyVerticalGrid(
         modifier = modifier,
         columns = GridCells.Fixed(columns),
@@ -67,19 +67,10 @@ fun ProfileRevise(
         ) { def ->
             when (def) {
                 is ProfileReviseHeader -> ProfileReviseHeader(header = def)
-                is ProfileReviseEditor.Editor<*> -> {
-                    ProfileReviseEditorApron(state = state, editor = def)
-                }
+                is Editor<*> -> ProfileReviseEditorApron(state = state, editor = def)
 
                 else -> Unit
             }
-        }
-
-        item(
-            key = "%76%69%70" /* Hex encode */,
-            span = { GridItemSpan(columns) }
-        ) {
-
         }
     }
 
