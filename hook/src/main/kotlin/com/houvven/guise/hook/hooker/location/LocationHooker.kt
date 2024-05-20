@@ -8,9 +8,9 @@ import com.highcapable.yukihookapi.hook.factory.allMethods
 import com.highcapable.yukihookapi.hook.factory.method
 import com.houvven.guise.hook.hooker.base.BaseHooker
 import com.houvven.guise.hook.profile.HookProfiles
-import com.houvven.guise.hook.util.LocationClass
-import com.houvven.guise.hook.util.LocationListenerClass
-import com.houvven.guise.hook.util.LocationManagerClass
+import com.houvven.guise.hook.util.type.LocationClass
+import com.houvven.guise.hook.util.type.LocationListenerClass
+import com.houvven.guise.hook.util.type.LocationManagerClass
 import java.lang.reflect.Proxy
 
 internal class LocationHooker(profile: HookProfiles) : BaseHooker.Default(profile) {
@@ -23,7 +23,7 @@ internal class LocationHooker(profile: HookProfiles) : BaseHooker.Default(profil
     ) { LocationManager.FUSED_PROVIDER }
 
     override fun doHook() {
-        loadHooker(GnssStatusHooker())
+        // loadHooker(GnssStatusHooker())
         this.hookLocationRequestUpdates()
         this.hookProviderStateGetter()
         this.hookLastKnownLocationGetter()

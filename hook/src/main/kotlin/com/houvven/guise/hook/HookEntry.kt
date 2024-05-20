@@ -11,6 +11,7 @@ import com.houvven.guise.hook.hooker.PropertiesHooker
 import com.houvven.guise.hook.hooker.ResourceConfigurationHooker
 import com.houvven.guise.hook.hooker.location.CellHooker
 import com.houvven.guise.hook.hooker.location.LocationHooker
+import com.houvven.guise.hook.hooker.system.location.SysLocationHooker
 import com.houvven.guise.hook.store.impl.SharedPreferenceModuleStore
 
 @InjectYukiHookWithXposed(
@@ -28,30 +29,33 @@ object HookEntry : IYukiHookXposedInit {
 
     override fun onHook() = encase {
         loadAppHooker()
-        loadSysHooker()
+        loadFrameworkHooker()
     }
 
     private fun PackageParam.loadAppHooker() {
         val store = SharedPreferenceModuleStore.Hooked(packageParam = this)
         val profiles = store.get(mainProcessName)
+        val blackList = listOf("android", "com.android.phone")
+        if (packageName in blackList) {
+            return
+        }
         if (!profiles.isAvailable) {
             YLog.info("No profiles for $packageName")
         }
-        loadApp(isExcludeSelf = true) {
-            profiles.run {
-                listOf(
-                    ::PackageHooker,
-                    ::ResourceConfigurationHooker,
-                    ::LocationHooker,
-                    ::CellHooker
-                ).forEach {
-                    loadHooker(it.invoke(this))
-                }
-                loadHooker(PropertiesHooker(properties))
-            }
-        }
+        loadApp(
+            isExcludeSelf = true,
+            *listOf(
+                ::PackageHooker,
+                ::ResourceConfigurationHooker,
+                ::LocationHooker,
+                ::CellHooker
+            ).map { it.invoke(profiles) }.plus(PropertiesHooker(profiles.properties)).toTypedArray()
+        )
     }
 
-    private fun PackageParam.loadSysHooker() {
+    private fun PackageParam.loadFrameworkHooker() {
+        loadSystem {
+            loadHooker(SysLocationHooker())
+        }
     }
 }

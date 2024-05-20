@@ -1,4 +1,4 @@
-package com.houvven.guise.hook.util
+package com.houvven.guise.hook.util.type
 
 import android.location.GnssStatus
 import android.location.GpsStatus

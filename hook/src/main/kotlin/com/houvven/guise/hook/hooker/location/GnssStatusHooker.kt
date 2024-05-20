@@ -4,8 +4,8 @@ import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.factory.constructor
 import com.highcapable.yukihookapi.hook.factory.current
 import com.highcapable.yukihookapi.hook.factory.method
-import com.houvven.guise.hook.util.GnssStatusClass
-import com.houvven.guise.hook.util.LocationManagerClass
+import com.houvven.guise.hook.util.type.GnssStatusClass
+import com.houvven.guise.hook.util.type.LocationManagerClass
 
 internal class GnssStatusHooker : YukiBaseHooker() {
 

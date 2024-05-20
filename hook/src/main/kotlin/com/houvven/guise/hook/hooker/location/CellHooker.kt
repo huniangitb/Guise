@@ -8,12 +8,12 @@ import com.highcapable.yukihookapi.hook.factory.current
 import com.highcapable.yukihookapi.hook.factory.method
 import com.houvven.guise.hook.hooker.base.BaseHooker
 import com.houvven.guise.hook.profile.HookProfiles
-import com.houvven.guise.hook.util.CellIdentityGsmClass
-import com.houvven.guise.hook.util.CellIdentityLteClass
-import com.houvven.guise.hook.util.CellIdentityNrClass
-import com.houvven.guise.hook.util.CellIdentityTdscdmaClass
-import com.houvven.guise.hook.util.CellIdentityWcdmaClass
-import com.houvven.guise.hook.util.TelephonyManagerClass
+import com.houvven.guise.hook.util.type.CellIdentityGsmClass
+import com.houvven.guise.hook.util.type.CellIdentityLteClass
+import com.houvven.guise.hook.util.type.CellIdentityNrClass
+import com.houvven.guise.hook.util.type.CellIdentityTdscdmaClass
+import com.houvven.guise.hook.util.type.CellIdentityWcdmaClass
+import com.houvven.guise.hook.util.type.TelephonyManagerClass
 
 internal class CellHooker(profiles: HookProfiles) : BaseHooker.Default(profiles) {
 
@@ -36,7 +36,7 @@ internal class CellHooker(profiles: HookProfiles) : BaseHooker.Default(profiles)
             clazz.constructor().hookAll().after {
                 instance.current {
                     setCellIdentityMccMnc()
-                    profile.cid?.let { field { name = "mCid" }.set(it) }
+                    profile.cid?.let { field { name = "mCid" }.set(it.toInt()) }
                     profile.lac?.let { field { name = "mLac" }.set(it) }
                 }
             }

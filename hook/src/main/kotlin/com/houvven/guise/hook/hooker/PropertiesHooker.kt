@@ -8,7 +8,7 @@ import com.highcapable.yukihookapi.hook.factory.method
 import com.highcapable.yukihookapi.hook.type.android.BuildClass
 import com.houvven.guise.hook.hooker.base.BaseHooker
 import com.houvven.guise.hook.profile.item.PropertiesProfile
-import com.houvven.guise.hook.util.SystemPropertiesClass
+import com.houvven.guise.hook.util.type.SystemPropertiesClass
 
 private const val TAG = "PropertiesHook"
 
