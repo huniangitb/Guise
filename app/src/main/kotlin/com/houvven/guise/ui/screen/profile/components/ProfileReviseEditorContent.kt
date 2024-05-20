@@ -38,6 +38,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.houvven.guise.data.domain.ProfileSuggest
+import org.koin.compose.koinInject
 
 @Composable
 fun ProfileReviseEditor.Text.EditorContent(state: ProfileReviseState) {
@@ -170,18 +171,22 @@ fun <T : Number> ProfileReviseEditor.TextNumber<T>.EditorContent(state: ProfileR
 
 
 @Composable
-fun <T> ProfileReviseEditor.Enum<T>.EditorContent(state: ProfileReviseState) {
+fun <T> ProfileReviseEditor.Enum<T>.EditorContent(
+    state: ProfileReviseState,
+) {
     val profiles by state.profilesState
+    val options = options.invoke(koinInject())
     val value = value.invoke(profiles)
     val onClick: (ProfileSuggest<T>) -> Unit = {
         state.updateAndDone(profiles.onSelectedChange(it))
     }
     LazyColumn {
-        items(items = suggests, key = { it.label + it.value }) {
+        items(items = options, key = { it.label + it.value }) {
             val selected = value == it.value
             val containerColor =
                 if (selected) MaterialTheme.colorScheme.primaryContainer
                 else Color.Transparent
+
             Card(
                 onClick = { onClick(it) },
                 colors = CardDefaults.cardColors(containerColor = containerColor)

@@ -30,7 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.houvven.guise.data.repository.ProfilesPlaceholderRepo
+import com.houvven.guise.data.repository.profile.ProfilesPlaceholderRepo
 import com.houvven.guise.ui.screen.profile.components.ProfileReviseEditor.Editor
 import com.houvven.guise.util.app.App
 
@@ -44,8 +44,8 @@ fun ProfileRevise(
     app: App,
     state: ProfileReviseState,
     modifier: Modifier = Modifier,
-    dataList: List<ProfileReviseContract> = ProfileReviseDataList,
-    columns: Int = 2,
+    dataList: List<ProfileReviseContract> = ProfilesReviseItemsDef,
+    columns: Int = 2
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     LazyVerticalGrid(
@@ -104,7 +104,7 @@ private fun ProfileReviseEditorSheet(
     state: ProfileReviseState,
     sheetState: SheetState = rememberModalBottomSheetState(),
     containerColor: Color = BottomSheetDefaults.ContainerColor,
-    contentColor: Color = contentColorFor(containerColor)
+    contentColor: Color = contentColorFor(containerColor),
 ) {
     val editor = state.editor
 
@@ -120,9 +120,9 @@ private fun ProfileReviseEditorSheet(
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 15.dp)
             ) {
                 when (editor) {
-                    is ProfileReviseEditor.Text -> editor.EditorContent(state = state)
-                    is ProfileReviseEditor.TextNumber<*> -> editor.EditorContent(state = state)
-                    is ProfileReviseEditor.Enum<*> -> editor.EditorContent(state = state)
+                    is ProfileReviseEditor.Text -> editor.EditorContent(state)
+                    is ProfileReviseEditor.TextNumber<*> -> editor.EditorContent(state)
+                    is ProfileReviseEditor.Enum<*> -> editor.EditorContent(state)
                     else -> Unit
                 }
             }

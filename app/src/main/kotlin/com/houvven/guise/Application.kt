@@ -3,8 +3,10 @@ package com.houvven.guise
 import android.util.Log
 import com.houvven.guise.hook.ModuleStatus
 import com.houvven.guise.injection.commonModule
+import com.houvven.guise.injection.profilesReviseModule
 import com.houvven.guise.injection.storeModule
 import com.houvven.guise.injection.viewModelModule
+import com.houvven.guise.service.root.FileSystemManagerService
 import com.houvven.guise.util.MY_USER_ID
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
@@ -27,7 +29,8 @@ class Application : AndroidApplication() {
             modules(
                 commonModule,
                 storeModule,
-                viewModelModule
+                viewModelModule,
+                profilesReviseModule
             )
         }
     }

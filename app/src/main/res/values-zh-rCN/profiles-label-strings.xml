@@ -18,4 +18,11 @@
     <string name="latitude">纬度</string>
     <string name="location">定位</string>
     <string name="base_station">基站</string>
+    <string name="network_type_none">无</string>
+    <string name="network_type_mobile">移动数据</string>
+    <string name="network_type_mobile_mms">移动数据((彩信)</string>
+    <string name="network_type_bluetooth">蓝牙</string>
+    <string name="network_type_ethernet">以太网</string>
+    <string name="network_type_proxy">代理</string>
+    <string name="network_info">网络信息</string>
 </resources>

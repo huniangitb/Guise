@@ -21,4 +21,14 @@
     <string name="latitude">Latitude</string>
     <string name="location">Location</string>
     <string name="base_station">Base station</string>
+    <string name="network_type_none">None</string>
+    <string name="network_type_wifi" translatable="false">WiFi</string>
+    <string name="network_type_mobile">Mobile</string>
+    <string name="network_type_mobile_mms">Mobile MMS</string>
+    <string name="network_type_wimax" translatable="false">WIMAX</string>
+    <string name="network_type_bluetooth">Bluetooth</string>
+    <string name="network_type_ethernet">Ethernet</string>
+    <string name="network_type_proxy">Proxy</string>
+    <string name="network_type_vpn" translatable="false">VPN</string>
+    <string name="network_info">Net Info</string>
 </resources>

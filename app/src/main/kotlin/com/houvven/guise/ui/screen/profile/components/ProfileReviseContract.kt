@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.houvven.guise.R
 import com.houvven.guise.data.domain.ProfileSuggest
-import com.houvven.guise.data.repository.ProfilesPlaceholderRepo
-import com.houvven.guise.data.repository.ProfilesReviseEditorEnumRepo
+import com.houvven.guise.data.repository.profile.ProfilesPlaceholderRepo
+import com.houvven.guise.data.repository.profile.ProfilesReviseEditorOptionsRepo
 import com.houvven.guise.hook.profile.HookProfiles
 import com.houvven.guise.hook.profile.item.PropertiesProfile
 
@@ -62,7 +62,7 @@ sealed class ProfileReviseEditor : ProfileReviseContract() {
         override val label: @Composable () -> String,
         override val value: Profiles.() -> T?,
         override val onValueClear: Profiles.() -> Profiles,
-        val suggests: List<ProfileSuggest<T>>,
+        val options: ProfilesReviseEditorOptionsRepo.() -> List<ProfileSuggest<T>>,
         open val onSelectedChange: Profiles.(ProfileSuggest<T>) -> Profiles,
     ) : Editor<T>()
 
@@ -76,12 +76,12 @@ sealed class ProfileReviseEditor : ProfileReviseContract() {
         value = value,
         onValueClear = onValueClear,
         onSelectedChange = onSelectedChange,
-        suggests = ProfilesReviseEditorEnumRepo.boolean
+        options = { boolean }
     )
 }
 
 
-val ProfileReviseDataList = listOf(
+private val PropertiesReviseItems = listOf(
     ProfileReviseHeader { stringResource(id = R.string.system_properties) },
     // Brand
     ProfileReviseEditor.Text(
@@ -115,7 +115,7 @@ val ProfileReviseDataList = listOf(
     ProfileReviseEditor.Enum(
         label = { stringResource(id = R.string.characteristic) },
         value = { properties.characteristics },
-        suggests = ProfilesReviseEditorEnumRepo.characteristics,
+        options = { characteristics },
         onValueClear = { properties { copy(characteristics = null) } },
         onSelectedChange = { properties { copy(characteristics = it.value) } },
     ),
@@ -128,9 +128,11 @@ val ProfileReviseDataList = listOf(
         label = { stringResource(id = R.string.fingerprint) },
         value = { properties.fingerprint },
         onValueChange = { properties { copy(fingerprint = it) } }
-    ),
+    )
+)
 
-    // App Info
+
+private val PackageInfoReviseItems = listOf(
     ProfileReviseHeader { stringResource(id = R.string.app_info) },
     // App Version Name
     ProfileReviseEditor.Text(
@@ -144,14 +146,15 @@ val ProfileReviseDataList = listOf(
         value = { versionCode },
         onValueChange = { copy(versionCode = it) },
         stringToNumber = { it.toIntOrNull() }
-    ),
+    )
+)
 
-    // Resource Configuration
+private val ResourceConfigReviseItems = listOf(
     ProfileReviseHeader { stringResource(id = R.string.resource_configuration) },
     ProfileReviseEditor.Enum(
         label = { stringResource(id = R.string.language) },
         value = { language },
-        suggests = ProfilesReviseEditorEnumRepo.language,
+        options = { language },
         onValueClear = { copy(language = null) },
         onSelectedChange = { copy(language = it.value) }
     ),
@@ -172,9 +175,10 @@ val ProfileReviseDataList = listOf(
         value = { fontScale },
         onValueChange = { copy(fontScale = it) },
         stringToNumber = { it.toFloatOrNull() }
-    ),
+    )
+)
 
-    // Location
+private val LocationReviseItems = listOf(
     ProfileReviseHeader { stringResource(id = R.string.location) },
     ProfileReviseEditor.TextNumber(
         label = { stringResource(id = R.string.longitude) },
@@ -187,8 +191,10 @@ val ProfileReviseDataList = listOf(
         value = { latitude },
         onValueChange = { copy(latitude = it) },
         stringToNumber = { it.toDoubleOrNull() }
-    ),
+    )
+)
 
+private val BaseStationReviseItems = listOf(
     ProfileReviseHeader { stringResource(id = R.string.base_station) },
     ProfileReviseEditor.TextNumber(
         label = { "Cid" },
@@ -197,7 +203,7 @@ val ProfileReviseDataList = listOf(
         stringToNumber = { it.toLongOrNull() }
     ),
     ProfileReviseEditor.TextNumber(
-        label = { "Lac" },
+        label = { "Lac/Tac" },
         value = { lac },
         onValueChange = { copy(lac = it) },
         stringToNumber = { it.toIntOrNull() }
@@ -209,6 +215,15 @@ val ProfileReviseDataList = listOf(
         stringToNumber = { it.toIntOrNull() }
     )
 )
+
+
+val ProfilesReviseItemsDef = listOf(
+    PropertiesReviseItems,
+    LocationReviseItems,
+    BaseStationReviseItems,
+    PackageInfoReviseItems,
+    ResourceConfigReviseItems
+).flatten()
 
 private fun Profiles.properties(function: PropertiesProfile.() -> PropertiesProfile) =
     copy(properties = properties.function())

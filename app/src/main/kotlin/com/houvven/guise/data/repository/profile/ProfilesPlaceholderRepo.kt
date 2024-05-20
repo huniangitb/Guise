@@ -1,4 +1,4 @@
-package com.houvven.guise.data.repository
+package com.houvven.guise.data.repository.profile
 
 import android.annotation.SuppressLint
 import android.content.res.Resources
