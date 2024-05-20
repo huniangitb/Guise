@@ -15,5 +15,6 @@ data class App(
     val icon: ImageBitmap = EmptyImageBitmap,
     val versionCode: Long,
     val versionName: String,
+    val dataDir: String,
     val isSystemApp: Boolean
 ) : Parcelable

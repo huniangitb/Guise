@@ -50,7 +50,7 @@ class AppScanner(
             ScanMode.ALL -> packages
             ScanMode.SYSTEM -> packages.filter { it.isSystemApp }
             ScanMode.USER -> packages.filter { !it.isSystemApp }
-        }.map {
+        }.filter { it.packageName !in excludedPackages }.map {
             emit(createApp(it))
         }
     }
@@ -69,7 +69,7 @@ class AppScanner(
             ScanMode.ALL -> packages
             ScanMode.SYSTEM -> packages.filter { it.isSystemApp }
             ScanMode.USER -> packages.filter { !it.isSystemApp }
-        }.map {
+        }.filter { it.packageName !in excludedPackages }.map {
             async(context = Dispatchers.Default, start = CoroutineStart.LAZY) { createApp(it) }
         }.awaitAll()
     }
@@ -124,7 +124,8 @@ class AppScanner(
             icon = applicationInfo.loadIcon(packageManager).toImageBitmapOrEmpty(),
             isSystemApp = isSystemApp,
             versionName = versionName ?: "",
-            versionCode = versionCodeCompat
+            versionCode = versionCodeCompat,
+            dataDir = applicationInfo.dataDir
         )
     }
 
