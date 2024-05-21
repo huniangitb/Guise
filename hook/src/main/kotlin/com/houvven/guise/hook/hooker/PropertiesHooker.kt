@@ -101,7 +101,8 @@ internal class PropertiesHooker(profile: PropertiesProfile) :
             PropertiesHookOption(
                 value = displayId,
                 fieldName = "DISPLAY",
-                propertiesKey = "ro.build.display.id"
+                propertiesKey = "ro.build.display.id",
+                type = BuildPropAscription.BUILD,
             ),
             PropertiesHookOption(
                 value = fingerprint,
