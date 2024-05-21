@@ -4,12 +4,15 @@ import android.os.Bundle
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -30,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import com.houvven.guise.data.repository.profile.ProfilesPlaceholderRepo
 import com.houvven.guise.ui.screen.profile.components.ProfileReviseEditor.Editor
 import com.houvven.guise.util.app.App
@@ -79,6 +83,8 @@ fun ProfileRevise(
         sheetState = sheetState
     )
 
+    ProfileReviseEditorDialog(state = state)
+
     SideEffect {
         ProfilesPlaceholderRepo.update(app)
     }
@@ -107,8 +113,12 @@ private fun ProfileReviseEditorSheet(
     contentColor: Color = contentColorFor(containerColor),
 ) {
     val editor = state.editor
+    val supported = listOf(
+        ProfileReviseEditor.Enum::class.java,
+        ProfileReviseEditor.BooleanEnum::class.java
+    )
 
-    if (editor != ProfileReviseEditor.None) {
+    if (editor::class.java in supported) {
         ModalBottomSheet(
             onDismissRequest = { state.edit(ProfileReviseEditor.None) },
             sheetState = sheetState,
@@ -120,10 +130,40 @@ private fun ProfileReviseEditorSheet(
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 15.dp)
             ) {
                 when (editor) {
-                    is ProfileReviseEditor.Text -> editor.EditorContent(state)
-                    is ProfileReviseEditor.TextNumber<*> -> editor.EditorContent(state)
                     is ProfileReviseEditor.Enum<*> -> editor.EditorContent(state)
                     else -> Unit
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ProfileReviseEditorDialog(
+    state: ProfileReviseState,
+) {
+    val editor = state.editor
+    val supported = listOf(
+        ProfileReviseEditor.Text::class.java,
+        ProfileReviseEditor.TextNumber::class.java
+    )
+    if (editor::class.java in supported) {
+        Dialog(onDismissRequest = { state.editNone() }) {
+            Card(
+                modifier = Modifier.imePadding(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                )
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.Top,
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    when (editor) {
+                        is ProfileReviseEditor.Text -> editor.EditorContent(state)
+                        is ProfileReviseEditor.TextNumber<*> -> editor.EditorContent(state)
+                        else -> Unit
+                    }
                 }
             }
         }
@@ -146,6 +186,10 @@ class ProfileReviseState(
 
     fun edit(editor: ProfileReviseEditor) {
         this.editor = editor
+    }
+
+    fun editNone() {
+        edit(ProfileReviseEditor.None)
     }
 
     fun update(profiles: Profiles) {

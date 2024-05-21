@@ -10,11 +10,12 @@ sealed interface ProfilesSuggestRepo {
 
     interface Random<out T> : ProfilesSuggestRepo {
 
-        fun generate(size: Int = 10): List<ProfileSuggest<out T>> {
-            if (size <= 0) return emptyList()
-            val list = mutableListOf<ProfileSuggest<out T>>()
-            repeat(size) { list.add(generate()) }
-            return list
+        fun generate(size: Int): Set<ProfileSuggest<out T>> {
+            val profiles = mutableSetOf<ProfileSuggest<out T>>()
+            for (i in 0 until size) {
+                profiles.add(generate())
+            }
+            return profiles
         }
 
         fun generate(): ProfileSuggest<out T>

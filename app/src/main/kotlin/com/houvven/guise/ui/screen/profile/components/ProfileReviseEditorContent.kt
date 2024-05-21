@@ -1,11 +1,13 @@
 package com.houvven.guise.ui.screen.profile.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
@@ -13,7 +15,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,7 +27,6 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -43,136 +47,154 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.houvven.guise.R
 import com.houvven.guise.data.domain.ProfileSuggest
+import com.houvven.guise.data.repository.profile.ProfilesSuggestRepo
 import com.houvven.guise.ui.style.OutlinedTextFieldTransparentBorderColor
 import org.koin.compose.koinInject
 
+
 @Composable
-fun ProfileReviseEditor.Text.EditorContent(state: ProfileReviseState) {
-    val profiles by state.profilesState
-    val originValue = value.invoke(profiles) ?: ""
-    var stagingVar by remember { mutableStateOf(originValue) }
-    val isEdited = stagingVar.isNotBlank()
+private fun BasicTextReviseEditor(
+    value: String?,
+    onDone: (String?) -> Unit,
+    label: String,
+    placeholder: String,
+    suggestRepo: ProfilesSuggestRepo?,
+    validator: (String) -> Boolean = { true },
+    keyboardType: KeyboardType = KeyboardType.Text
+) {
     val focusRequester = remember { FocusRequester() }
-
+    var staging by remember { mutableStateOf(value) }
     val onStagingValueChange: (String) -> Unit = {
-        if (validator(it)) stagingVar = it
+        when {
+            it.isBlank() -> staging = null
+            validator(it) -> staging = it
+        }
     }
-
-    val onDone = {
-        state.update(profiles.onValueChange(stagingVar.takeUnless { it.isBlank() }))
-        state.edit(ProfileReviseEditor.None)
-    }
-
-    Column(
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        AnimatedVisibility(
-            visible = stagingVar != originValue,
-            modifier = Modifier.align(Alignment.End)
+    val trailingIcon = @Composable {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            TextButton(onClick = onDone) {
-                Text(text = stringResource(id = androidx.appcompat.R.string.abc_action_mode_done))
+            AnimatedVisibility(visible = !staging.isNullOrBlank()) {
+                IconButton(onClick = { staging = null }) {
+                    Icon(Icons.Filled.Clear, contentDescription = null)
+                }
             }
         }
-        TextField(
-            value = stagingVar,
-            onValueChange = onStagingValueChange,
-            placeholder = { Text(text = placeholder) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(focusRequester),
-            trailingIcon = {
-                AnimatedVisibility(visible = isEdited) {
-                    IconButton(onClick = { stagingVar = "" }) {
-                        Icon(Icons.Filled.Clear, contentDescription = null)
-                    }
-                }
-            },
-            keyboardOptions = KeyboardOptions(
-                showKeyboardOnFocus = true,
-                imeAction = ImeAction.Done
-            ),
-            keyboardActions = KeyboardActions(
-                onDone = { onDone() }
-            ),
-            shape = MaterialTheme.shapes.medium,
-            colors = TextFieldDefaults.colors(
-                unfocusedIndicatorColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent,
-                focusedSupportingTextColor = Color.Transparent
-            )
-        )
+    }
 
-        SideEffect {
-            focusRequester.requestFocus()
+    ListItem(
+        headlineContent = { Text(text = label, style = MaterialTheme.typography.titleLarge) },
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+        trailingContent = {
+            AnimatedVisibility(visible = staging != value) {
+                Icon(
+                    Icons.Default.Save,
+                    contentDescription = null,
+                    modifier = Modifier.clickable { onDone.invoke(staging) }
+                )
+            }
+        }
+    )
+
+    TextField(
+        value = staging ?: "",
+        onValueChange = onStagingValueChange,
+        modifier = Modifier
+            .fillMaxWidth()
+            .focusRequester(focusRequester),
+        placeholder = { Text(text = placeholder) },
+        trailingIcon = trailingIcon,
+        keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Done,
+            keyboardType = keyboardType
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = { onDone.invoke(staging) },
+        ),
+        shape = MaterialTheme.shapes.medium,
+        colors = TextFieldDefaults.colors(
+            unfocusedIndicatorColor = Color.Transparent,
+            focusedIndicatorColor = Color.Transparent,
+            focusedSupportingTextColor = Color.Transparent
+        )
+    )
+
+    SideEffect {
+        focusRequester.requestFocus()
+    }
+
+    /**
+     * Random Suggestions Repo Content
+     */
+    @Composable
+    fun ProfilesSuggestRepo.Random<*>.Content() {
+        val getter = { generate(6).toList() }
+        var suggests by remember {
+            mutableStateOf(getter.invoke())
+        }
+
+        Box {
+            LazyColumn(
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .clip(MaterialTheme.shapes.medium)
+                    .background(MaterialTheme.colorScheme.surface),
+            ) {
+                items(suggests) {
+                    ListItem(
+                        headlineContent = {
+                            Text(
+                                text = it.label,
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        },
+                        modifier = Modifier.clickable { onStagingValueChange.invoke(it.value.toString()) }
+                    )
+                }
+            }
+            FilledIconButton(
+                onClick = { suggests = getter.invoke() },
+                modifier = Modifier.align(Alignment.BottomEnd)
+            ) {
+                Icon(Icons.Rounded.Refresh, contentDescription = null)
+            }
         }
     }
+
+    when (suggestRepo) {
+        is ProfilesSuggestRepo.Random<*> -> suggestRepo.Content()
+        else -> Unit
+    }
+}
+
+@Composable
+fun ProfileReviseEditor.Text.EditorContent(
+    state: ProfileReviseState
+) {
+    val profiles by state.profilesState
+    BasicTextReviseEditor(
+        value = value.invoke(profiles),
+        onDone = { state.updateAndDone(onValueChange.invoke(profiles, it)) },
+        label = label.invoke(),
+        placeholder = placeholder,
+        suggestRepo = suggestRepo,
+        validator = validator
+    )
 }
 
 
 @Composable
 fun <T : Number> ProfileReviseEditor.TextNumber<T>.EditorContent(state: ProfileReviseState) {
     val profiles by state.profilesState
-    val originValue = value.invoke(profiles)?.toString() ?: ""
-    var stagingVar by remember { mutableStateOf(originValue) }
-    val isEdited = stagingVar.isNotBlank()
-    val focusRequester = remember { FocusRequester() }
-
-    // string to number
-    val number = stringToNumber(stagingVar)
-    val onStagingValueChange: (String) -> Unit = {
-        if (it.isBlank() || validator(number)) {
-            stagingVar = it
-        }
-    }
-    val onDone = {
-        state.update(profiles.onValueChange(number))
-        state.edit(ProfileReviseEditor.None)
-    }
-
-    Column(
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        AnimatedVisibility(
-            visible = originValue != stagingVar,
-            modifier = Modifier.align(Alignment.End)
-        ) {
-            TextButton(onClick = onDone) {
-                Text(text = stringResource(id = androidx.appcompat.R.string.abc_action_mode_done))
-            }
-        }
-        TextField(
-            value = stagingVar,
-            onValueChange = onStagingValueChange,
-            placeholder = { Text(text = placeholder) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(focusRequester),
-            trailingIcon = {
-                AnimatedVisibility(visible = isEdited) {
-                    IconButton(onClick = { stagingVar = "" }) {
-                        Icon(Icons.Filled.Clear, contentDescription = null)
-                    }
-                }
-            },
-            keyboardOptions = KeyboardOptions(
-                showKeyboardOnFocus = true,
-                keyboardType = KeyboardType.Number,
-                imeAction = ImeAction.Done
-            ),
-            keyboardActions = KeyboardActions(
-                onDone = { onDone() }
-            ),
-            shape = MaterialTheme.shapes.medium,
-            colors = TextFieldDefaults.colors(
-                unfocusedIndicatorColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent,
-                focusedSupportingTextColor = Color.Transparent
-            )
-        )
-    }
+    BasicTextReviseEditor(
+        value = value.invoke(profiles)?.toString(),
+        onDone = { state.updateAndDone(onValueChange.invoke(profiles, stringToNumber(it ?: ""))) },
+        label = label.invoke(),
+        placeholder = placeholder,
+        suggestRepo = null,
+        validator = { validator.invoke(stringToNumber(it)) },
+        keyboardType = KeyboardType.Number
+    )
 }
 
 

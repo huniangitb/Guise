@@ -47,6 +47,7 @@ sealed class ProfileReviseEditor : ProfileReviseContract() {
         override val label: @Composable () -> String,
         override val value: Profiles.() -> String?,
         val onValueChange: Profiles.(String?) -> Profiles,
+        val suggestRepo: ProfilesSuggestRepo? = null,
         override val onValueClear: Profiles.() -> Profiles = { onValueChange(null) }
     ) : Editor<String>()
 
@@ -54,8 +55,9 @@ sealed class ProfileReviseEditor : ProfileReviseContract() {
         override val label: @Composable () -> String,
         override val value: Profiles.() -> T?,
         val onValueChange: Profiles.(T?) -> Profiles,
-        override val onValueClear: Profiles.() -> Profiles = { onValueChange(null) },
         val stringToNumber: (String) -> T?,
+        val suggestRepo: ProfilesSuggestRepo? = null,
+        override val onValueClear: Profiles.() -> Profiles = { onValueChange(null) },
     ) : Editor<T>()
 
     open class Enum<T>(
