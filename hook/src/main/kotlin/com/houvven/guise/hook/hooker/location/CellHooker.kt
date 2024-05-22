@@ -17,6 +17,11 @@ import com.houvven.guise.hook.util.type.TelephonyManagerClass
 
 internal class CellHooker(private val profile: HookProfiles) : YukiBaseHooker() {
 
+    private val cid = if (profile.disableCellLocation) 0 else profile.cid
+    private val lac = if (profile.disableCellLocation) 0 else profile.lac
+    private val tac = if (profile.disableCellLocation) 0 else profile.tac
+    private val pci = if (profile.disableCellLocation) 0 else profile.pci
+
     override fun onHook() {
         this.hookCellIdentity()
         this.hookCellLocationGetter()
@@ -36,8 +41,8 @@ internal class CellHooker(private val profile: HookProfiles) : YukiBaseHooker() 
             clazz.constructor().hookAll().after {
                 instance.current {
                     setCellIdentityMccMnc()
-                    profile.cid?.let { field { name = "mCid" }.set(it.toInt()) }
-                    profile.lac?.let { field { name = "mLac" }.set(it) }
+                    cid?.let { field { name = "mCid" }.set(it.toInt()) }
+                    lac?.let { field { name = "mLac" }.set(it) }
                 }
             }
         }
@@ -46,9 +51,9 @@ internal class CellHooker(private val profile: HookProfiles) : YukiBaseHooker() 
         CellIdentityLteClass.constructor().hookAll().after {
             instance.current {
                 setCellIdentityMccMnc()
-                profile.cid?.let { field { name = "mCi" }.set(it) }
-                profile.tac?.let { field { name = "mTac" }.set(it) }
-                profile.pci?.let { field { name = "mPci" }.set(it) }
+                cid?.let { field { name = "mCi" }.set(it) }
+                tac?.let { field { name = "mTac" }.set(it) }
+                pci?.let { field { name = "mPci" }.set(it) }
             }
         }
 
@@ -57,9 +62,9 @@ internal class CellHooker(private val profile: HookProfiles) : YukiBaseHooker() 
             CellIdentityNrClass.constructor().hookAll().after {
                 instance.current {
                     setCellIdentityMccMnc()
-                    profile.cid?.let { field { name = "mNci" }.set(it) }
-                    profile.tac?.let { field { name = "mTac" }.set(it) }
-                    profile.pci?.let { field { name = "mPci" }.set(it) }
+                    cid?.let { field { name = "mNci" }.set(it) }
+                    tac?.let { field { name = "mTac" }.set(it) }
+                    pci?.let { field { name = "mPci" }.set(it) }
                 }
             }
         }
@@ -71,8 +76,8 @@ internal class CellHooker(private val profile: HookProfiles) : YukiBaseHooker() 
         }.ignored().hook().after {
             when (val cellLocation = result) {
                 is GsmCellLocation -> {
-                    val cid = profile.cid?.toInt() ?: cellLocation.cid
-                    val lac = profile.lac ?: cellLocation.lac
+                    val cid = cid?.toInt() ?: cellLocation.cid
+                    val lac = lac ?: cellLocation.lac
                     cellLocation.setLacAndCid(lac, cid)
                 }
             }
