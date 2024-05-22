@@ -1,16 +1,16 @@
 package com.houvven.guise.hook.hooker
 
+import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.factory.current
 import com.highcapable.yukihookapi.hook.factory.method
 import com.highcapable.yukihookapi.hook.type.java.IntType
-import com.houvven.guise.hook.hooker.base.BaseHooker
 import com.houvven.guise.hook.profile.HookProfiles
 import com.houvven.guise.hook.util.type.ConnectivityManagerClass
 import com.houvven.guise.hook.util.type.TelephonyManagerClass
 
-internal class NetworkHooker(profile: HookProfiles) : BaseHooker.Default(profile) {
+internal class NetworkHooker(private val profile: HookProfiles) : YukiBaseHooker() {
 
-    override fun doHook() {
+    override fun onHook() {
         this.hookActiveNetworkType()
         this.hookMobileNetworkType()
     }

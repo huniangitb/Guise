@@ -2,15 +2,15 @@ package com.houvven.guise.hook.hooker
 
 import android.content.pm.PackageInfo
 import com.highcapable.betterandroid.system.extension.tool.SystemVersion
+import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.factory.field
 import com.highcapable.yukihookapi.hook.factory.method
 import com.highcapable.yukihookapi.hook.type.android.ApplicationPackageManagerClass
-import com.houvven.guise.hook.hooker.base.BaseHooker
 import com.houvven.guise.hook.profile.HookProfiles
 
-internal class PackageHooker(profile: HookProfiles) : BaseHooker.Default(profile) {
+internal class PackageHooker(private val profile: HookProfiles) : YukiBaseHooker() {
 
-    override fun doHook() {
+    override fun onHook() {
         hookPackageInfoGetter()
         hookBuildConfig()
     }

@@ -1,17 +1,17 @@
 package com.houvven.guise.hook.hooker
 
 import android.provider.Settings.Secure
+import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.factory.method
 import com.highcapable.yukihookapi.hook.type.android.ContentResolverClass
 import com.highcapable.yukihookapi.hook.type.android.Settings_SecureClass
 import com.highcapable.yukihookapi.hook.type.java.IntType
 import com.highcapable.yukihookapi.hook.type.java.StringClass
-import com.houvven.guise.hook.hooker.base.BaseHooker
 import com.houvven.guise.hook.profile.HookProfiles
 
-internal class SettingsSecureHooker(profiles: HookProfiles) : BaseHooker.Default(profiles) {
+internal class SettingsSecureHooker(private val profile: HookProfiles) : YukiBaseHooker() {
 
-    override fun doHook() {
+    override fun onHook() {
         Settings_SecureClass.method {
             name = "getStringForUser"
             param(ContentResolverClass, StringClass, IntType)

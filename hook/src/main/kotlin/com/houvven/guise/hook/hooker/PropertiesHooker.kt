@@ -2,18 +2,18 @@ package com.houvven.guise.hook.hooker
 
 import android.os.Build
 import android.util.Log
+import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.factory.classOf
 import com.highcapable.yukihookapi.hook.factory.field
 import com.highcapable.yukihookapi.hook.factory.method
 import com.highcapable.yukihookapi.hook.type.android.BuildClass
-import com.houvven.guise.hook.hooker.base.BaseHooker
 import com.houvven.guise.hook.profile.item.PropertiesProfile
 import com.houvven.guise.hook.util.type.SystemPropertiesClass
 
 private const val TAG = "PropertiesHook"
 
-internal class PropertiesHooker(profile: PropertiesProfile) :
-    BaseHooker<PropertiesProfile>(profile) {
+internal class PropertiesHooker(private  val profile: PropertiesProfile) :
+    YukiBaseHooker() {
 
     private val options = mutableListOf<PropertiesHookOption>()
 
@@ -21,7 +21,7 @@ internal class PropertiesHooker(profile: PropertiesProfile) :
         options.addAll(buildHookOption())
     }
 
-    override fun doHook() {
+    override fun onHook() {
         options.forEach { option ->
             val (value, fieldName, _, type) = option
 

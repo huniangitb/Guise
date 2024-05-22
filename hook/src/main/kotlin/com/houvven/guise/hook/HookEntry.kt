@@ -44,6 +44,7 @@ object HookEntry : IYukiHookXposedInit {
         }
         if (!profiles.isAvailable) {
             YLog.info("No profiles for $packageName")
+            return
         }
         loadApp(
             isExcludeSelf = true,
@@ -66,4 +67,5 @@ object HookEntry : IYukiHookXposedInit {
             loadHooker(SysLocationHooker())
         }
     }
+
 }

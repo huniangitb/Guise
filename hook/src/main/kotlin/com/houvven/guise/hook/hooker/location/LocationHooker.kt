@@ -4,25 +4,24 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import com.highcapable.betterandroid.system.extension.tool.SystemVersion
+import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.factory.allMethods
 import com.highcapable.yukihookapi.hook.factory.method
-import com.houvven.guise.hook.hooker.base.BaseHooker
 import com.houvven.guise.hook.profile.HookProfiles
 import com.houvven.guise.hook.util.type.LocationClass
 import com.houvven.guise.hook.util.type.LocationListenerClass
 import com.houvven.guise.hook.util.type.LocationManagerClass
 
-internal class LocationHooker(profile: HookProfiles) : BaseHooker.Default(profile) {
+internal class LocationHooker(private  val profile: HookProfiles) : YukiBaseHooker() {
 
-    override val isEffective: Boolean = profile.isLocationAvailable
 
     private val locationProvider = SystemVersion.require(
         SystemVersion.S,
         LocationManager.GPS_PROVIDER
     ) { LocationManager.FUSED_PROVIDER }
 
-    override fun doHook() {
-        // loadHooker(GnssStatusHooker())
+    override fun onHook() {
+        loadHooker(GnssStatusHooker())
         this.hookLocationRequestUpdates()
         this.hookProviderStateGetter()
         this.hookLastKnownLocationGetter()

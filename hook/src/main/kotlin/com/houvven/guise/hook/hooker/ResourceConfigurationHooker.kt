@@ -3,16 +3,16 @@ package com.houvven.guise.hook.hooker
 import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.os.LocaleList
+import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.factory.current
 import com.highcapable.yukihookapi.hook.factory.method
 import com.highcapable.yukihookapi.hook.type.android.ResourcesClass
-import com.houvven.guise.hook.hooker.base.BaseHooker
 import com.houvven.guise.hook.profile.HookProfiles
 import java.util.Locale
 
-internal class ResourceConfigurationHooker(profiles: HookProfiles) : BaseHooker.Default(profiles) {
+internal class ResourceConfigurationHooker(private val profile: HookProfiles) : YukiBaseHooker() {
 
-    override fun doHook() {
+    override fun onHook() {
         this.hookResourceGetter()
     }
 

@@ -3,10 +3,10 @@ package com.houvven.guise.hook.hooker.location
 import android.telephony.gsm.GsmCellLocation
 import com.highcapable.betterandroid.system.extension.tool.SystemVersion
 import com.highcapable.yukihookapi.hook.bean.CurrentClass
+import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.factory.constructor
 import com.highcapable.yukihookapi.hook.factory.current
 import com.highcapable.yukihookapi.hook.factory.method
-import com.houvven.guise.hook.hooker.base.BaseHooker
 import com.houvven.guise.hook.profile.HookProfiles
 import com.houvven.guise.hook.util.type.CellIdentityGsmClass
 import com.houvven.guise.hook.util.type.CellIdentityLteClass
@@ -15,9 +15,9 @@ import com.houvven.guise.hook.util.type.CellIdentityTdscdmaClass
 import com.houvven.guise.hook.util.type.CellIdentityWcdmaClass
 import com.houvven.guise.hook.util.type.TelephonyManagerClass
 
-internal class CellHooker(profiles: HookProfiles) : BaseHooker.Default(profiles) {
+internal class CellHooker(private val profile: HookProfiles) : YukiBaseHooker() {
 
-    override fun doHook() {
+    override fun onHook() {
         this.hookCellIdentity()
         this.hookCellLocationGetter()
     }
