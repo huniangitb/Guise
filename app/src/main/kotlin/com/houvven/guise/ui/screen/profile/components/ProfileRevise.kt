@@ -4,8 +4,12 @@ import android.os.Bundle
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -34,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.houvven.guise.data.repository.profile.ProfilesPlaceholderRepo
 import com.houvven.guise.ui.screen.profile.components.ProfileReviseEditor.Editor
 import com.houvven.guise.util.app.App
@@ -148,9 +153,15 @@ fun ProfileReviseEditorDialog(
         ProfileReviseEditor.TextNumber::class.java
     )
     if (editor::class.java in supported) {
-        Dialog(onDismissRequest = { state.editNone() }) {
+        Dialog(
+            onDismissRequest = { state.editNone() },
+            properties = DialogProperties(dismissOnClickOutside = true)
+        ) {
             Card(
-                modifier = Modifier.imePadding(),
+                modifier = Modifier
+                    .windowInsetsPadding(WindowInsets.safeContent)
+                    .fillMaxHeight(0.8f)
+                    .wrapContentHeight(),
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainerLow
                 )
