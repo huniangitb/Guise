@@ -115,6 +115,7 @@ dependencies {
     implementation(libs.kotlin.serialization.json)
     implementation(libs.betterandroid.extension.system)
     implementation(libs.lservice)
+    implementation(libs.hiddenapibypass)
 }
 
 apksign {
