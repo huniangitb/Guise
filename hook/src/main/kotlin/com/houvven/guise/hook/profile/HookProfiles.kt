@@ -24,6 +24,7 @@ data class HookProfiles(
 
     // Network
     val networkType: Int? = null,
+    val mobileNetType: Int? = null,
     val simOperator: String? = null,
 
     // Location
@@ -35,6 +36,10 @@ data class HookProfiles(
     val longitude: Double? = null,
     /** 维度 */
     val latitude: Double? = null,
+
+    val ssaid: String? = null,
+
+    val timezone: String? = null,
 ) : Profile {
 
     val mcc = simOperator?.substring(0, 3)

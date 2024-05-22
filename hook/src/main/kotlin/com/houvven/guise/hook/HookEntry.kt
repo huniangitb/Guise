@@ -6,9 +6,12 @@ import com.highcapable.yukihookapi.hook.factory.encase
 import com.highcapable.yukihookapi.hook.log.YLog
 import com.highcapable.yukihookapi.hook.param.PackageParam
 import com.highcapable.yukihookapi.hook.xposed.proxy.IYukiHookXposedInit
+import com.houvven.guise.hook.hooker.NetworkHooker
 import com.houvven.guise.hook.hooker.PackageHooker
 import com.houvven.guise.hook.hooker.PropertiesHooker
 import com.houvven.guise.hook.hooker.ResourceConfigurationHooker
+import com.houvven.guise.hook.hooker.SettingsSecureHooker
+import com.houvven.guise.hook.hooker.TimezoneHooker
 import com.houvven.guise.hook.hooker.location.CellHooker
 import com.houvven.guise.hook.hooker.location.LocationHooker
 import com.houvven.guise.hook.hooker.system.location.SysLocationHooker
@@ -35,7 +38,7 @@ object HookEntry : IYukiHookXposedInit {
     private fun PackageParam.loadAppHooker() {
         val store = SharedPreferenceModuleStore.Hooked(packageParam = this)
         val profiles = store.get(mainProcessName)
-        val blackList = listOf("android", "com.android.phone")
+        val blackList = listOf("android", "com.android.phone", "com.houvven.guise")
         if (packageName in blackList) {
             return
         }
@@ -48,8 +51,13 @@ object HookEntry : IYukiHookXposedInit {
                 ::PackageHooker,
                 ::ResourceConfigurationHooker,
                 ::LocationHooker,
-                ::CellHooker
-            ).map { it.invoke(profiles) }.plus(PropertiesHooker(profiles.properties)).toTypedArray()
+                ::CellHooker,
+                ::SettingsSecureHooker,
+                ::TimezoneHooker,
+                ::NetworkHooker
+            ).map { it.invoke(profiles) }
+                .plus(PropertiesHooker(profiles.properties))
+                .toTypedArray()
         )
     }
 
