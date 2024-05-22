@@ -23,12 +23,13 @@
     <string name="base_station">Base station</string>
     <string name="network_type_none">None</string>
     <string name="network_type_wifi" translatable="false">WiFi</string>
-    <string name="network_type_mobile">Mobile</string>
-    <string name="network_type_mobile_mms">Mobile MMS</string>
-    <string name="network_type_wimax" translatable="false">WIMAX</string>
+    <string name="network_type_cellular">Cellular</string>
     <string name="network_type_bluetooth">Bluetooth</string>
     <string name="network_type_ethernet">Ethernet</string>
-    <string name="network_type_proxy">Proxy</string>
     <string name="network_type_vpn" translatable="false">VPN</string>
     <string name="network_info">Net Info</string>
+    <string name="network_type">Network Type</string>
+    <string name="identity">Identity</string>
+    <string name="ssaid" translatable="false">SSAID</string>
+    <string name="mobile_network_type">Mobile Net Type</string>
 </resources>
