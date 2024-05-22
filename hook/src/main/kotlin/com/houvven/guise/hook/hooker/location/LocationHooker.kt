@@ -11,7 +11,6 @@ import com.houvven.guise.hook.profile.HookProfiles
 import com.houvven.guise.hook.util.type.LocationClass
 import com.houvven.guise.hook.util.type.LocationListenerClass
 import com.houvven.guise.hook.util.type.LocationManagerClass
-import java.lang.reflect.Proxy
 
 internal class LocationHooker(profile: HookProfiles) : BaseHooker.Default(profile) {
 
@@ -43,22 +42,7 @@ internal class LocationHooker(profile: HookProfiles) : BaseHooker.Default(profil
                 before {
                     val listener = args[index] as LocationListener
                     val listenerClass = listener::class.java
-                    val proxyInstance = Proxy.newProxyInstance(
-                        listenerClass.classLoader,
-                        arrayOf(LocationListenerClass)
-                    ) { _, method, args ->
-                        val locationIndex = args.indexOfFirst { it is Location }
-                        if (locationIndex != -1) {
-                            val location = args[locationIndex] as Location
-                            val provideLocation = provideLocation(location)
-                            val proxyArgs = args.toMutableList().apply {
-                                set(locationIndex, provideLocation)
-                            }.toTypedArray()
-                            return@newProxyInstance method.invoke(listener, *proxyArgs)
-                        }
-                        return@newProxyInstance method.invoke(listener, *args)
-                    }
-                    args[index] = proxyInstance
+                    setLocationListener(listenerClass)
                 }
             }
         }
@@ -84,13 +68,14 @@ internal class LocationHooker(profile: HookProfiles) : BaseHooker.Default(profil
 
     private fun setLocationListener(clazz: Class<out LocationListener>) {
         clazz.allMethods { _, method ->
-            val index = method.parameterTypes.indexOfFirst { it.isAssignableFrom(LocationClass) }
-            if (index != -1) {
+            val locationIndex =
+                method.parameterTypes.indexOfFirst { it.isAssignableFrom(LocationClass) }
+            if (locationIndex != -1) {
                 method.hook {
                     before {
-                        val origin = args[index] as? Location ?: return@before
+                        val origin = args[locationIndex] as? Location ?: return@before
                         val provideLocation = provideLocation(origin)
-                        args[index] = provideLocation
+                        args[locationIndex] = provideLocation
                     }
                 }
             }
