@@ -4,20 +4,13 @@ import com.houvven.guise.data.domain.ProfileSuggest
 
 sealed interface ProfilesSuggestRepo {
 
-    interface Local : ProfilesSuggestRepo
+    interface Local<T> : ProfilesSuggestRepo {
+        fun get(): List<ProfileSuggest<out T>>
+    }
 
     interface Remote : ProfilesSuggestRepo
 
-    interface Random<out T> : ProfilesSuggestRepo {
-
-        fun generate(size: Int): Set<ProfileSuggest<out T>> {
-            val profiles = mutableSetOf<ProfileSuggest<out T>>()
-            for (i in 0 until size) {
-                profiles.add(generate())
-            }
-            return profiles
-        }
-
-        fun generate(): ProfileSuggest<out T>
+    class Random<out T>(private val generate: () -> ProfileSuggest<out T>) : ProfilesSuggestRepo {
+        fun generate(size: Int) = (0 until size).map { generate.invoke() }.toSet()
     }
 }
