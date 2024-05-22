@@ -12,6 +12,7 @@ import com.houvven.guise.hook.hooker.PropertiesHooker
 import com.houvven.guise.hook.hooker.ResourceConfigurationHooker
 import com.houvven.guise.hook.hooker.SettingsSecureHooker
 import com.houvven.guise.hook.hooker.TimezoneHooker
+import com.houvven.guise.hook.hooker.WifiHooker
 import com.houvven.guise.hook.hooker.location.CellHooker
 import com.houvven.guise.hook.hooker.location.LocationHooker
 import com.houvven.guise.hook.hooker.system.location.SysLocationHooker
@@ -55,7 +56,8 @@ object HookEntry : IYukiHookXposedInit {
                 ::CellHooker,
                 ::SettingsSecureHooker,
                 ::TimezoneHooker,
-                ::NetworkHooker
+                ::NetworkHooker,
+                ::WifiHooker
             ).map { it.invoke(profiles) }
                 .plus(PropertiesHooker(profiles.properties))
                 .toTypedArray()

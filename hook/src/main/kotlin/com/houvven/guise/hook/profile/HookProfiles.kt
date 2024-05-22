@@ -27,15 +27,25 @@ data class HookProfiles(
     val mobileNetType: Int? = null,
     val simOperator: String? = null,
 
-    // Location
+    val wifiSsid: String? = null,
+    val wifiBssid: String? = null,
+    val wifiMac: String? = null,
+
+    // Base station
     val cid: Long? = null,
     val lac: Int? = null,
     val pci: Int? = null,
 
+    // Location
     /** 经度 */
     val longitude: Double? = null,
     /** 维度 */
     val latitude: Double? = null,
+    /** 返回空的WiFi信息  */
+    val disableWifiLocation: Boolean = false,
+    /** 返回空的基站信息 */
+    val disableCellLocation: Boolean = false,
+
 
     val ssaid: String? = null,
 
