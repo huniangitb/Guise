@@ -10,14 +10,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material3.Button
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -30,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -84,16 +86,7 @@ private fun BasicTextReviseEditor(
 
     ListItem(
         headlineContent = { Text(text = label, style = MaterialTheme.typography.titleLarge) },
-        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-        trailingContent = {
-            AnimatedVisibility(visible = staging != value) {
-                Icon(
-                    Icons.Default.Save,
-                    contentDescription = null,
-                    modifier = Modifier.clickable { onDone.invoke(staging) }
-                )
-            }
-        }
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
     )
 
     TextField(
@@ -119,9 +112,34 @@ private fun BasicTextReviseEditor(
         )
     )
 
+    Button(
+        onClick = { onDone.invoke(staging) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        shape = MaterialTheme.shapes.medium
+    ) {
+        Text(text = stringResource(id = androidx.appcompat.R.string.abc_action_mode_done))
+    }
+
     SideEffect {
         focusRequester.requestFocus()
     }
+
+
+    @Composable
+    fun SuggestItem(currentValue: String, suggest: ProfileSuggest<*>) {
+        val selected = suggest.value.toString() == currentValue
+        val containerColor =
+            if (selected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
+
+        ListItem(
+            headlineContent = { Text(text = suggest.label) },
+            modifier = Modifier.clickable { onStagingValueChange.invoke(suggest.value.toString()) },
+            colors = ListItemDefaults.colors(containerColor = containerColor)
+        )
+    }
+
 
     /**
      * Random Suggestions Repo Content
@@ -136,21 +154,11 @@ private fun BasicTextReviseEditor(
         Box {
             LazyColumn(
                 modifier = Modifier
-                    .padding(vertical = 8.dp)
+                    .padding(vertical = 4.dp)
                     .clip(MaterialTheme.shapes.medium)
                     .background(MaterialTheme.colorScheme.surface),
             ) {
-                items(suggests) {
-                    ListItem(
-                        headlineContent = {
-                            Text(
-                                text = it.label,
-                                style = MaterialTheme.typography.labelLarge
-                            )
-                        },
-                        modifier = Modifier.clickable { onStagingValueChange.invoke(it.value.toString()) }
-                    )
-                }
+                items(suggests) { SuggestItem(suggest = it, currentValue = staging ?: "") }
             }
             FilledIconButton(
                 onClick = { suggests = getter.invoke() },
@@ -161,8 +169,35 @@ private fun BasicTextReviseEditor(
         }
     }
 
+    @Composable
+    fun ProfilesSuggestRepo.Local<*>.Content(query: String) {
+        val suggests = remember { get().toList() }
+        val state = rememberLazyListState()
+        LazyColumn(
+            modifier = Modifier
+                .padding(vertical = 4.dp)
+                .clip(MaterialTheme.shapes.medium)
+                .background(MaterialTheme.colorScheme.surface),
+            state = state
+        ) {
+            items(suggests) {
+                SuggestItem(
+                    suggest = it,
+                    currentValue = staging ?: ""
+                )
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            suggests.indexOfFirst { it.value.toString() == staging }.takeIf { it != -1 }?.let {
+                state.scrollToItem(it)
+            }
+        }
+    }
+
     when (suggestRepo) {
         is ProfilesSuggestRepo.Random<*> -> suggestRepo.Content()
+        is ProfilesSuggestRepo.Local<*> -> suggestRepo.Content(query = staging ?: "")
         else -> Unit
     }
 }
@@ -191,7 +226,7 @@ fun <T : Number> ProfileReviseEditor.TextNumber<T>.EditorContent(state: ProfileR
         onDone = { state.updateAndDone(onValueChange.invoke(profiles, stringToNumber(it ?: ""))) },
         label = label.invoke(),
         placeholder = placeholder,
-        suggestRepo = null,
+        suggestRepo = suggestRepo,
         validator = { validator.invoke(stringToNumber(it)) },
         keyboardType = KeyboardType.Number
     )
