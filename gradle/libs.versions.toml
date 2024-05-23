@@ -1,5 +1,5 @@
 [versions]
-agp = "8.4.0"
+agp = "8.4.1"
 composeDestinations = "2.1.0-beta03"
 hiddenapibypass = "4.3"
 koin = "3.5.6"
