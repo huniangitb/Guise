@@ -43,17 +43,17 @@ fun createModuleApplications(uid: Int, vararg packageNames: String) =
 fun ILSPManagerService.putModuleScope(
     moduleName: String,
     applicationsFunc: () -> Set<Application>
-) {
+): Boolean {
     val moduleScope = getModuleScope(moduleName).toMutableSet()
     moduleScope.addAll(applicationsFunc())
-    setModuleScope(moduleName, moduleScope.toList())
+    return setModuleScope(moduleName, moduleScope.toList())
 }
 
 fun ILSPManagerService.removeModuleScope(
     moduleName: String,
     applicationsFunc: () -> Set<Application>
-) {
+): Boolean {
     val moduleScope = getModuleScope(moduleName).toMutableSet()
     moduleScope.removeAll(applicationsFunc())
-    setModuleScope(moduleName, moduleScope.toList())
+    return setModuleScope(moduleName, moduleScope.toList())
 }

@@ -7,16 +7,25 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import android.util.Log
 import androidx.annotation.StringRes
+import com.houvven.guise.BuildConfig
 import com.houvven.guise.R
+import com.houvven.guise.hook.profile.HookProfiles
+import com.houvven.guise.util.MY_USER_ID
+import com.houvven.guise.util.createModuleApplications
+import com.houvven.guise.util.putModuleScope
+import com.houvven.guise.util.removeModuleScope
 import com.topjohnwu.superuser.ipc.RootService
 import io.github.houvven.lservice.ILServiceBridge
 import io.github.houvven.lservice.LServiceBridgeRootService
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.lsposed.lspd.ILSPManagerService
 import org.lsposed.lspd.service.ILSPApplicationService
-import kotlin.concurrent.thread
 
 /**
  * This object is a client for the LService.
@@ -24,7 +33,11 @@ import kotlin.concurrent.thread
  */
 object LServiceBridgeClient {
 
-    private lateinit var lserviceBridge: ILServiceBridge
+    private var lserviceBridge: ILServiceBridge? = null
+
+    private var applicationService: ILSPApplicationService? = null
+
+    private var managerService: ILSPManagerService? = null
 
     private val _statusFlow: MutableStateFlow<Status> = MutableStateFlow(Status.Connecting)
     val statusFlow = _statusFlow.asStateFlow()
@@ -47,15 +60,13 @@ object LServiceBridgeClient {
         }
     }
 
-    // The application service of the LService
-    private val applicationService: ILSPApplicationService
-        get() = ILSPApplicationService.Stub.asInterface(lserviceBridge.applicationServiceBinder)
 
     /**
      * Starts the LService and binds to it.
      * @param context The context used to start the service.
      */
 
+    @OptIn(DelicateCoroutinesApi::class)
     fun start(context: Context) {
         val intent = Intent(context, LServiceBridgeRootService::class.java)
         intent.putExtra(LServiceBridgeRootService.MANAGER_APK_PATH, context.managerApkPath)
@@ -67,29 +78,65 @@ object LServiceBridgeClient {
         }
         RootService.bind(intent, connection)
 
-        thread { // watch the connection status
+        GlobalScope.launch { // watch the connection status
             val startTime = System.currentTimeMillis()
             while (System.currentTimeMillis() - startTime < 5000) {
-                if (::lserviceBridge.isInitialized) {
-                    Log.i(TAG, "LService bridge connected")
+                if (lserviceBridge != null) {
+                    Log.i(TAG, "watch: LService bridge connected")
                     _statusFlow.update { Status.Connected }
                     break
                 }
-                kotlin.runCatching { Thread.sleep(200) }
+                delay(200)
             }
+            setManagerService()
         }
     }
 
-    /**
-     * Gets the manager service of the LService.
-     * @param applicationService The application service of the LService. Defaults to this object's application service.
-     * @return The manager service of the LService.
-     */
-    @Suppress("MemberVisibilityCanBePrivate")
-    fun getManagerService(applicationService: ILSPApplicationService = this.applicationService): ILSPManagerService {
-        val binder = lserviceBridge.getManagerServiceBinder(applicationService)
-        return ILSPManagerService.Stub.asInterface(binder)
+    fun setScope(profiles: HookProfiles) = profiles.run {
+        if (isAvailable) addScope(packageName!!) else removeScope(packageName!!)
     }
+
+    fun removeScope(vararg packageName: String): Boolean {
+        return managerService?.removeModuleScope(BuildConfig.APPLICATION_ID) {
+            createModuleApplications(MY_USER_ID, *packageName).toSet()
+        } ?: false
+    }
+
+    fun addScope(vararg packageName: String): Boolean {
+        return managerService?.putModuleScope(BuildConfig.APPLICATION_ID) {
+            createModuleApplications(MY_USER_ID, *packageName).toSet()
+        } ?: false
+    }
+
+    private suspend fun setManagerService() {
+        // max 5 seconds to wait for the manager service
+        val startTime = System.currentTimeMillis()
+        var binder = lserviceBridge?.applicationServiceBinder
+        while (binder?.isBinderAlive != true) {
+            if (System.currentTimeMillis() - startTime > 5000) {
+                Log.e(TAG, "Failed to get application service binder")
+                return
+            }
+            delay(200)
+        }
+        applicationService = ILSPApplicationService.Stub.asInterface(binder)
+
+        binder = lserviceBridge!!.getManagerServiceBinder(applicationService)
+        val check = lserviceBridge == null || applicationService == null
+        while (check || binder?.isBinderAlive != true) {
+            if (System.currentTimeMillis() - startTime > 5000) {
+                Log.e(TAG, "Failed to get application service binder")
+                return
+            }
+            delay(200)
+        }
+        managerService = ILSPManagerService.Stub.asInterface(binder)
+        with(managerService!!) {
+            Log.d(TAG, "xposed api: $api")
+            Log.d(TAG, "xposed version: $xposedVersionName($xposedVersionCode)")
+        }
+    }
+
 
     /**
      * Gets the path of the manager APK.

@@ -8,6 +8,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.highcapable.betterandroid.system.extension.component.clipboardManager
 import com.highcapable.betterandroid.system.extension.component.copy
 import com.houvven.guise.R
+import com.houvven.guise.client.LServiceBridgeClient
 import com.houvven.guise.hook.profile.HookProfiles
 import com.houvven.guise.hook.store.ModuleStore
 import com.houvven.guise.ui.screen.profile.components.ProfileReviseState
@@ -31,7 +32,9 @@ class AppProfileReviseCoordinator(
 
     fun onSave() {
         runCatching {
-            moduleStore.set(reviseState.profilesState.value)
+            val profiles = reviseState.profilesState.value
+            moduleStore.set(profiles)
+            LServiceBridgeClient.setScope(profiles)
         }.onSuccess {
             context.showToast(R.string.success)
         }

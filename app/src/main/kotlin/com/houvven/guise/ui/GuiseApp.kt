@@ -1,11 +1,9 @@
 package com.houvven.guise.ui
 
 import android.annotation.SuppressLint
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
@@ -76,25 +74,19 @@ private fun LServiceErrorStatusDia() {
     val error = lServiceBridgeStatus as? LServiceBridgeClient.Status.Error
     var iSee by remember { mutableStateOf(false) }
     val visible = error != null && !iSee
-    AnimatedVisibility(visible = visible) {
-        AlertDialog(
-            onDismissRequest = { },
-            confirmButton = {
-                Button(onClick = {
-                    iSee = true
-                }) { Text(text = stringResource(id = R.string.ok)) }
-            },
-            title = { Text(text = stringResource(id = R.string.lservice_error_title)) },
-            text = {
-                Column {
-                    Text(text = stringResource(id = error!!.messageResId))
-                    Text(text = stringResource(id = R.string.lservice_description))
-                }
-            },
-            shape = MaterialTheme.shapes.medium,
-            containerColor = MaterialTheme.colorScheme.errorContainer
-        )
-    }
+    if (visible) AlertDialog(
+        onDismissRequest = { iSee = true },
+        confirmButton = {},
+        title = { Text(text = stringResource(id = R.string.lservice_error_title)) },
+        text = {
+            Column {
+                Text(text = stringResource(id = error!!.messageResId))
+                Text(text = stringResource(id = R.string.lservice_description))
+            }
+        },
+        shape = MaterialTheme.shapes.medium,
+        containerColor = MaterialTheme.colorScheme.errorContainer
+    )
 
     LaunchedEffect(error) {
         if (error != null && iSee) {

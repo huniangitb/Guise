@@ -25,4 +25,7 @@
     <string name="turn_off">关闭</string>
     <string name="copy_to_clipboard">复制到剪贴板</string>
     <string name="import_from_clipboard">从剪贴板导入</string>
+    <string name="lservice_error_title">LService故障</string>
+    <string name="lservice_description">用于LSPosed作用域同步的服务，仅在LSPosed上支持。</string>
+    <string name="ok">好</string>
 </resources>
