@@ -8,7 +8,6 @@ plugins {
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.lsplugin.apksign)
     // alias(libs.plugins.compose.compiler)
 }
 
@@ -30,10 +29,15 @@ android {
         }
     }
     signingConfigs {
-        all {
+        create("release") {
             enableV1Signing = true
             enableV2Signing = true
             enableV3Signing = true
+            val properties = loadProperties(rootProject.file("local.properties").path)
+            storeFile = File(properties.getProperty("sign.store.file"))
+            storePassword = properties.getProperty("sign.store.password")
+            keyAlias = properties.getProperty("sign.key.alias")
+            keyPassword = properties.getProperty("sign.key.password")
         }
     }
     buildTypes {
@@ -44,6 +48,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
@@ -119,11 +124,4 @@ dependencies {
     implementation(libs.lservice)
     implementation(libs.libsu.io)
     implementation(libs.hiddenapibypass)
-}
-
-apksign {
-    this.storeFileProperty = "sign.store.file"
-    this.storePasswordProperty = "sign.store.password"
-    this.keyAliasProperty = "sign.key.alias"
-    this.keyPasswordProperty = "sign.key.password"
 }
