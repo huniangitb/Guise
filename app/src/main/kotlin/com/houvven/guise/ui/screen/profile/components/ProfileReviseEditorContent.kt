@@ -171,7 +171,7 @@ private fun BasicTextReviseEditor(
 
     @Composable
     fun ProfilesSuggestRepo.Local<*>.Content(query: String) {
-        val suggests = remember { get().toList() }
+        val suggests = remember { get() }
         val state = rememberLazyListState()
         LazyColumn(
             modifier = Modifier

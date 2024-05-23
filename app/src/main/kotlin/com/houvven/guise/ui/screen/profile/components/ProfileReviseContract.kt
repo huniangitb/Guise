@@ -4,10 +4,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.houvven.guise.R
 import com.houvven.guise.data.domain.ProfileSuggest
+import com.houvven.guise.data.repository.profile.AndroidIdRandomRepo
+import com.houvven.guise.data.repository.profile.MobileNetworkTypeRepo
+import com.houvven.guise.data.repository.profile.NetworkType
 import com.houvven.guise.data.repository.profile.ProfilesPlaceholderRepo
-import com.houvven.guise.data.repository.profile.ProfilesReviseEditorOptionsRepo
+import com.houvven.guise.data.repository.profile.ProfilesSuggestRepo
+import com.houvven.guise.data.repository.profile.ProfilesSuggestRepo_Enum
 import com.houvven.guise.hook.profile.HookProfiles
 import com.houvven.guise.hook.profile.item.PropertiesProfile
+import org.koin.java.KoinJavaComponent.inject
 
 typealias Profiles = HookProfiles
 
@@ -64,7 +69,7 @@ sealed class ProfileReviseEditor : ProfileReviseContract() {
         override val label: @Composable () -> String,
         override val value: Profiles.() -> T?,
         override val onValueClear: Profiles.() -> Profiles,
-        val options: ProfilesReviseEditorOptionsRepo.() -> List<ProfileSuggest<T>>,
+        val options: ProfilesSuggestRepo_Enum.() -> List<ProfileSuggest<T>>,
         open val onSelectedChange: Profiles.(ProfileSuggest<T>) -> Profiles,
     ) : Editor<T>()
 
@@ -218,13 +223,42 @@ private val BaseStationReviseItems = listOf(
     )
 )
 
+private val NetworkReviseItems = listOf(
+    ProfileReviseHeader { stringResource(id = R.string.network_info) },
+    ProfileReviseEditor.TextNumber(
+        label = { stringResource(id = R.string.network_type) },
+        value = { networkType },
+        onValueChange = { copy(networkType = it) },
+        stringToNumber = { it.toIntOrNull() },
+        suggestRepo = inject<NetworkType>(NetworkType::class.java).value
+    ),
+    ProfileReviseEditor.TextNumber(
+        label = { stringResource(id = R.string.mobile_network_type) },
+        value = { mobileNetType },
+        onValueChange = { copy(mobileNetType = it) },
+        stringToNumber = { it.toIntOrNull() },
+        suggestRepo = MobileNetworkTypeRepo
+    )
+)
+
+private val IdentityReviseItems = listOf(
+    ProfileReviseHeader { stringResource(id = R.string.identity) },
+    ProfileReviseEditor.Text(
+        label = { stringResource(id = R.string.ssaid) },
+        value = { ssaid },
+        onValueChange = { copy(ssaid = it) },
+        suggestRepo = AndroidIdRandomRepo
+    )
+)
 
 val ProfilesReviseItemsDef = listOf(
     PropertiesReviseItems,
+    NetworkReviseItems,
     LocationReviseItems,
     BaseStationReviseItems,
     PackageInfoReviseItems,
-    ResourceConfigReviseItems
+    ResourceConfigReviseItems,
+    IdentityReviseItems
 ).flatten()
 
 private fun Profiles.properties(function: PropertiesProfile.() -> PropertiesProfile) =

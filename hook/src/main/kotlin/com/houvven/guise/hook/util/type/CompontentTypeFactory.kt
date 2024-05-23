@@ -7,6 +7,7 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.location.LocationRequest
 import android.net.ConnectivityManager
+import android.net.wifi.WifiManager
 import android.os.Build
 import android.telephony.CellIdentity
 import android.telephony.CellIdentityCdma
@@ -56,3 +57,5 @@ val GnssStatusClass = classOf<GnssStatus>()
 val GpsStatusClass = classOf<GpsStatus>()
 
 val ConnectivityManagerClass = classOf<ConnectivityManager>()
+
+val WifiManagerClass  = classOf<WifiManager>()

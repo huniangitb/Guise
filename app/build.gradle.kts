@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.lsplugin.apksign)
+    // alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -38,6 +39,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -115,6 +117,7 @@ dependencies {
     implementation(libs.kotlin.serialization.json)
     implementation(libs.betterandroid.extension.system)
     implementation(libs.lservice)
+    implementation(libs.libsu.io)
     implementation(libs.hiddenapibypass)
 }
 

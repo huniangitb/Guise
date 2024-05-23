@@ -30,7 +30,7 @@ class Application : AndroidApplication() {
                 commonModule,
                 storeModule,
                 viewModelModule,
-                profilesReviseModule
+                profileSuggestModule
             )
         }
 

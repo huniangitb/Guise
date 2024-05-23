@@ -2,7 +2,8 @@ package com.houvven.guise.injection
 
 import com.houvven.guise.BuildConfig
 import com.houvven.guise.data.AppsStore
-import com.houvven.guise.data.repository.profile.ProfilesReviseEditorOptionsRepo
+import com.houvven.guise.data.repository.profile.NetworkType
+import com.houvven.guise.data.repository.profile.ProfilesSuggestRepo_Enum
 import com.houvven.guise.hook.store.ModuleStore
 import com.houvven.guise.hook.store.impl.MediaModuleStore
 import com.houvven.guise.hook.store.impl.SharedPreferenceModuleStore
@@ -43,9 +44,12 @@ val storeModule = module {
     }
 }
 
-val profilesReviseModule = module {
+val profileSuggestModule = module {
     single {
-        ProfilesReviseEditorOptionsRepo(androidContext())
+        ProfilesSuggestRepo_Enum(androidContext())
+    }
+    single {
+        NetworkType(androidContext())
     }
 }
 
