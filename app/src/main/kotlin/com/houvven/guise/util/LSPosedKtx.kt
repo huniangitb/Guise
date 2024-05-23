@@ -53,7 +53,10 @@ fun ILSPManagerService.removeModuleScope(
     moduleName: String,
     applicationsFunc: () -> Set<Application>
 ): Boolean {
+    val applications = applicationsFunc.invoke()
     val moduleScope = getModuleScope(moduleName).toMutableSet()
-    moduleScope.removeAll(applicationsFunc())
+    moduleScope.removeAll {
+        applications.any { app -> app.userId == it.userId && app.packageName == it.packageName }
+    }
     return setModuleScope(moduleName, moduleScope.toList())
 }
