@@ -10,8 +10,10 @@ internal class TimezoneHooker(private val profile: HookProfiles) : YukiBaseHooke
 
 
     override fun onHook() {
-        TimeZoneClass.method {
-            name = "getDefaultRef"
-        }.hook().replaceTo(TimeZone.getTimeZone(profile.timezone))
+        profile.timezone?.let {
+            TimeZoneClass.method {
+                name = "getDefaultRef"
+            }.hook().replaceTo(TimeZone.getTimeZone(profile.timezone))
+        }
     }
 }
