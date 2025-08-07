@@ -32,9 +32,7 @@ android {
         }
     }
 
-    // --- 关键修改 1: 完全移除 signingConfigs 块 ---
-    // 由于我们不再定义自定义的 release 签名，此块不再需要。
-    // signingConfigs { ... }
+    // signingConfigs 块已被移除，因为我们不再需要自定义签名
 
     buildTypes {
         release {
@@ -44,9 +42,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // --- 关键修改 2: 强制 release 构建使用 debug 签名 ---
-            // 这使得 release 构建不再需要 local.properties 或任何私有密钥。
-            // 生成的 APK 将使用通用的调试签名，可用于后续的重新签名。
+            // 强制 release 构建使用 debug 签名，无需任何私有密钥
             signingConfig = signingConfigs.getByName("debug")
         }
     }
@@ -77,8 +73,9 @@ android {
             include("arm64-v8a", "x86_64")
         }
     }
-}
+} // <-- 这里是 android {} 块的结束位置
 
+// --- 关键修改：此代码块必须在 android {} 块之外 ---
 // 使用 AGP 7+ 推荐的 androidComponents API 来设置输出文件名
 androidComponents {
     onVariants { variant ->
@@ -89,10 +86,12 @@ androidComponents {
             } else {
                 "${baseOutputName}-${variant.flavorName}.apk"
             }
+            // 正确的属性是 outputFileName
             output.outputFileName.set(finalOutputName)
         }
     }
 }
+// --- 关键修改结束 ---
 
 dependencies {
     implementation(project(":hook"))
