@@ -1,6 +1,4 @@
-import com.android.build.gradle.internal.api.BaseVariantOutputImpl
 import org.jetbrains.kotlin.konan.properties.loadProperties
-import com.android.build.api.variant.ApplicationVariant
 
 plugins {
     kotlin("kapt")
@@ -20,7 +18,6 @@ android {
         applicationId = namespace
         minSdk = 24
         targetSdk = 35
-        // 确保 version.properties 存在，否则这里也会报错
         val versionPropsFile = file("version.properties")
         if (!versionPropsFile.exists()) {
             throw GradleException("version.properties file not found at ${versionPropsFile.absolutePath}")
@@ -34,26 +31,11 @@ android {
             useSupportLibrary = true
         }
     }
-    signingConfigs {
-        // 为了在没有 local.properties 时也能编译，我们添加条件判断
-        val localPropertiesFile = rootProject.file("local.properties")
-        if (localPropertiesFile.exists()) {
-            create("release") {
-                enableV1Signing = true
-                enableV2Signing = true
-                enableV3Signing = true
-                val properties = loadProperties(localPropertiesFile.path)
-                // 确保属性存在，否则这里会抛出 NullPointerException
-                storeFile = File(properties.getProperty("sign.store.file") ?: error("sign.store.file not found in local.properties"))
-                storePassword = properties.getProperty("sign.store.password") ?: error("sign.store.password not found in local.properties")
-                keyAlias = properties.getProperty("sign.key.alias") ?: error("sign.key.alias not found in local.properties")
-                keyPassword = properties.getProperty("sign.key.password") ?: error("sign.key.password not found in local.properties")
-            }
-        } else {
-            // 如果 local.properties 不存在，为了编译通过，可以打印警告
-            println("Warning: local.properties not found. Release signing config will not be explicitly set and will default to debug signing if not overridden.")
-        }
-    }
+
+    // --- 关键修改 1: 完全移除 signingConfigs 块 ---
+    // 由于我们不再定义自定义的 release 签名，此块不再需要。
+    // signingConfigs { ... }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -62,14 +44,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // 仅当 release 签名配置存在时才应用
-            if (signingConfigs.findByName("release") != null) {
-                signingConfig = signingConfigs.getByName("release")
-            } else {
-                // 如果没有 release 签名配置，则使用 debug 签名配置
-                // 这意味着在没有 local.properties 时，release 构建将使用 debug 签名
-                signingConfig = signingConfigs.getByName("debug")
-            }
+            // --- 关键修改 2: 强制 release 构建使用 debug 签名 ---
+            // 这使得 release 构建不再需要 local.properties 或任何私有密钥。
+            // 生成的 APK 将使用通用的调试签名，可用于后续的重新签名。
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
@@ -99,27 +77,21 @@ android {
             include("arm64-v8a", "x86_64")
         }
     }
+}
 
-    // --- 解决 NullPointerException 的关键修改 ---
-    // 替换掉旧的 buildOutputs.all {}
-    // 使用新的 applicationVariants.all API 来处理构建变体的输出
-    applicationVariants.all { variant ->
-        variant.outputs.all { output ->
-            // 对于 AGP 8.x，output.outputFileName 是一个 Property<String>
-            // 需要使用 .set() 方法来设置其值
-
-            val baseOutputName = "${rootProject.name}-${variant.buildType.name}"
-            val finalOutputName = if (variant.flavorName.isNotEmpty()) {
-                "${baseOutputName}-${variant.flavorName}.apk"
-            } else {
+// 使用 AGP 7+ 推荐的 androidComponents API 来设置输出文件名
+androidComponents {
+    onVariants { variant ->
+        variant.outputs.forEach { output ->
+            val baseOutputName = "${rootProject.name}-${variant.buildType}"
+            val finalOutputName = if (variant.flavorName.isNullOrEmpty()) {
                 "${baseOutputName}.apk"
+            } else {
+                "${baseOutputName}-${variant.flavorName}.apk"
             }
-
-            // 设置 APK 的输出文件名
-            output.archiveFileName.set(finalOutputName)
+            output.outputFileName.set(finalOutputName)
         }
     }
-    // --- 关键修改结束 ---
 }
 
 dependencies {
