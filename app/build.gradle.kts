@@ -30,6 +30,12 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        // --- 关键修改 1: 指定仅打包 arm64-v8a ABI ---
+        // 这会告诉 Gradle 只将 arm64-v8a 的 .so 文件包含在最终的 APK 中。
+        ndk {
+            abiFilters += "arm64-v8a"
+        }
     }
 
     // signingConfigs 块已被移除
@@ -65,26 +71,26 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    // --- 关键修改 2: 完全移除 splits 块以禁用分包 ---
+    /*
     splits {
         abi {
             isEnable = true
-            isUniversalApk = true
-            reset()
-            include("arm64-v8a", "x86_64")
+            ...
         }
     }
+    */
 } // <-- android {} 块结束
 
-// --- 最终的、正确的修改 ---
 // 使用 androidComponents API 和 archivesBaseName 来设置输出文件的基础名称
+// 这个逻辑在禁用分包后依然有效且正确
 androidComponents {
     onVariants { variant ->
-        // 设置该变体的基础名称，Gradle 会自动添加 ABI 后缀和 .apk 扩展名
-        // variant.name 会是类似 "release" 或 "debug" 的名字
+        // variant.name 会是 "release" 或 "debug"
         variant.archivesBaseName.set("${rootProject.name}-${variant.name}")
     }
 }
-// --- 修改结束 ---
 
 dependencies {
     implementation(project(":hook"))
