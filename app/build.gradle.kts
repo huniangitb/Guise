@@ -32,7 +32,7 @@ android {
         }
     }
 
-    // signingConfigs 块已被移除，因为我们不再需要自定义签名
+    // signingConfigs 块已被移除
 
     buildTypes {
         release {
@@ -42,7 +42,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // 强制 release 构建使用 debug 签名，无需任何私有密钥
+            // 强制 release 构建使用 debug 签名
             signingConfig = signingConfigs.getByName("debug")
         }
     }
@@ -73,25 +73,18 @@ android {
             include("arm64-v8a", "x86_64")
         }
     }
-} // <-- 这里是 android {} 块的结束位置
+} // <-- android {} 块结束
 
-// --- 关键修改：此代码块必须在 android {} 块之外 ---
-// 使用 AGP 7+ 推荐的 androidComponents API 来设置输出文件名
+// --- 最终的、正确的修改 ---
+// 使用 androidComponents API 和 archivesBaseName 来设置输出文件的基础名称
 androidComponents {
     onVariants { variant ->
-        variant.outputs.forEach { output ->
-            val baseOutputName = "${rootProject.name}-${variant.buildType}"
-            val finalOutputName = if (variant.flavorName.isNullOrEmpty()) {
-                "${baseOutputName}.apk"
-            } else {
-                "${baseOutputName}-${variant.flavorName}.apk"
-            }
-            // 正确的属性是 outputFileName
-            output.outputFileName.set(finalOutputName)
-        }
+        // 设置该变体的基础名称，Gradle 会自动添加 ABI 后缀和 .apk 扩展名
+        // variant.name 会是类似 "release" 或 "debug" 的名字
+        variant.archivesBaseName.set("${rootProject.name}-${variant.name}")
     }
 }
-// --- 关键修改结束 ---
+// --- 修改结束 ---
 
 dependencies {
     implementation(project(":hook"))
