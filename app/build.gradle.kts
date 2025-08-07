@@ -31,8 +31,7 @@ android {
             useSupportLibrary = true
         }
 
-        // --- 关键修改 1: 指定仅打包 arm64-v8a ABI ---
-        // 这会告诉 Gradle 只将 arm64-v8a 的 .so 文件包含在最终的 APK 中。
+        // 仅打包 arm64-v8a ABI
         ndk {
             abiFilters += "arm64-v8a"
         }
@@ -72,25 +71,21 @@ android {
         }
     }
 
-    // --- 关键修改 2: 完全移除 splits 块以禁用分包 ---
-    /*
-    splits {
-        abi {
-            isEnable = true
-            ...
-        }
-    }
-    */
+    // splits 块已被移除
+    
 } // <-- android {} 块结束
 
-// 使用 androidComponents API 和 archivesBaseName 来设置输出文件的基础名称
-// 这个逻辑在禁用分包后依然有效且正确
+// --- 关键修改: 完全移除 androidComponents 块 ---
+// 为了确保编译通过，我们让 Gradle 使用默认的文件命名逻辑。
+// 这将避免所有 Unresolved reference 错误。
+/*
 androidComponents {
     onVariants { variant ->
-        // variant.name 会是 "release" 或 "debug"
-        variant.archivesBaseName.set("${rootProject.name}-${variant.name}")
+        // ... 此处的所有逻辑都已被证明在此配置下存在问题 ...
     }
 }
+*/
+// --- 关键修改结束 ---
 
 dependencies {
     implementation(project(":hook"))
