@@ -1,5 +1,6 @@
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
 import org.jetbrains.kotlin.konan.properties.loadProperties
+import com.android.build.api.variant.ApplicationVariant
 
 plugins {
     kotlin("kapt")
@@ -20,7 +21,11 @@ android {
         minSdk = 24
         targetSdk = 35
         // 确保 version.properties 存在，否则这里也会报错
-        val version = loadProperties(file("version.properties").path)
+        val versionPropsFile = file("version.properties")
+        if (!versionPropsFile.exists()) {
+            throw GradleException("version.properties file not found at ${versionPropsFile.absolutePath}")
+        }
+        val version = loadProperties(versionPropsFile.path)
         versionCode = version.getProperty("version.code").toInt()
         versionName = version.getProperty("version.name")
 
@@ -30,49 +35,23 @@ android {
         }
     }
     signingConfigs {
-        // 为了在没有 local.properties 时也能编译，我们将 release 签名配置暂时注释掉。
-        // 如果你需要发布版本，你需要提供这些签名信息。
-        // 或者，你可以考虑在 CI/CD 环境中通过环境变量注入这些值。
-        /*
-        create("release") {
-            enableV1Signing = true
-            enableV2Signing = true
-            enableV3Signing = true
-            // 检查 local.properties 是否存在，如果不存在则跳过签名配置
-            if (rootProject.file("local.properties").exists()) {
-                val properties = loadProperties(rootProject.file("local.properties").path)
-                storeFile = File(properties.getProperty("sign.store.file"))
-                storePassword = properties.getProperty("sign.store.password")
-                keyAlias = properties.getProperty("sign.key.alias")
-                keyPassword = properties.getProperty("sign.key.password")
-            } else {
-                // 在没有 local.properties 时，为了编译通过，可以考虑使用默认的 debug 签名
-                // 警告：这会导致 release 构建使用 debug 签名，不适用于生产环境发布
-                println("Warning: local.properties not found. Release build will use debug signing config.")
-                storeFile = file("debug.keystore") // 默认的 debug 密钥库
-                storePassword = "android"
-                keyAlias = "androiddebugkey"
-                keyPassword = "android"
-            }
-        }
-        */
-        // 临时解决方案：如果 local.properties 不存在，则不创建 release 签名配置
-        // 这样 release 构建会回退到 debug 签名
-        if (rootProject.file("local.properties").exists()) {
+        // 为了在没有 local.properties 时也能编译，我们添加条件判断
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
             create("release") {
                 enableV1Signing = true
                 enableV2Signing = true
                 enableV3Signing = true
-                val properties = loadProperties(rootProject.file("local.properties").path)
-                storeFile = File(properties.getProperty("sign.store.file"))
-                storePassword = properties.getProperty("sign.store.password")
-                keyAlias = properties.getProperty("sign.key.alias")
-                keyPassword = properties.getProperty("sign.key.password")
+                val properties = loadProperties(localPropertiesFile.path)
+                // 确保属性存在，否则这里会抛出 NullPointerException
+                storeFile = File(properties.getProperty("sign.store.file") ?: error("sign.store.file not found in local.properties"))
+                storePassword = properties.getProperty("sign.store.password") ?: error("sign.store.password not found in local.properties")
+                keyAlias = properties.getProperty("sign.key.alias") ?: error("sign.key.alias not found in local.properties")
+                keyPassword = properties.getProperty("sign.key.password") ?: error("sign.key.password not found in local.properties")
             }
         } else {
-            // 如果 local.properties 不存在，确保 release 构建类型不引用不存在的签名配置
-            // 或者使用默认的 debug 签名
-            println("Warning: local.properties not found. Release signing config will not be applied or will use default debug signing.")
+            // 如果 local.properties 不存在，为了编译通过，可以打印警告
+            println("Warning: local.properties not found. Release signing config will not be explicitly set and will default to debug signing if not overridden.")
         }
     }
     buildTypes {
@@ -88,6 +67,7 @@ android {
                 signingConfig = signingConfigs.getByName("release")
             } else {
                 // 如果没有 release 签名配置，则使用 debug 签名配置
+                // 这意味着在没有 local.properties 时，release 构建将使用 debug 签名
                 signingConfig = signingConfigs.getByName("debug")
             }
         }
@@ -119,10 +99,27 @@ android {
             include("arm64-v8a", "x86_64")
         }
     }
-    buildOutputs.all {
-        this as BaseVariantOutputImpl
-        outputFileName = "${rootProject.name}-${name}.apk"
+
+    // --- 解决 NullPointerException 的关键修改 ---
+    // 替换掉旧的 buildOutputs.all {}
+    // 使用新的 applicationVariants.all API 来处理构建变体的输出
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            // 对于 AGP 8.x，output.outputFileName 是一个 Property<String>
+            // 需要使用 .set() 方法来设置其值
+
+            val baseOutputName = "${rootProject.name}-${variant.buildType.name}"
+            val finalOutputName = if (variant.flavorName.isNotEmpty()) {
+                "${baseOutputName}-${variant.flavorName}.apk"
+            } else {
+                "${baseOutputName}.apk"
+            }
+
+            // 设置 APK 的输出文件名
+            output.outputFileName.set(finalOutputName)
+        }
     }
+    // --- 关键修改结束 ---
 }
 
 dependencies {
